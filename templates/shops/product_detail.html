@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }} - Pi Market{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Produits</a></li>
+        <li class="breadcrumb-item active">{{ product.title }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <!-- Images Produit -->
+    <div class="col-md-6">
+        <div class="card">
+            {% if product.image and product.image.url %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 500px; object-fit: cover;">
+            {% else %}
+            <img src="/static/images/placeholder.png" class="card-img-top" alt="Image non disponible" style="height: 500px; object-fit: cover;">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Détails Produit -->
+    <div class="col-md-6">
+        <h1 class="display-5 fw-bold mb-3">{{ product.title }}</h1>
+        
+        <div class="mb-3">
+            {% if product.in_stock %}
+            <span class="badge bg-success fs-6">
+                <i class="bi bi-check-circle"></i> En Stock ({{ product.stock }} disponibles)
+            </span>
+            {% else %}
+            <span class="badge bg-danger fs-6">
+                <i class="bi bi-x-circle"></i> Rupture de Stock
+            </span>
+            {% endif %}
+            
+            {% if product.is_digital %}
+            <span class="badge bg-info fs-6">
+                <i class="bi bi-cloud-download"></i> Produit Digital
+            </span>
+            {% endif %}
+        </div>
+
+        <!-- Prix -->
+        <div class="card bg-light mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-6">
+                        <h3 class="text-primary mb-0">${{ product.price_fiat }}</h3>
+                        <small class="text-muted">Prix en Fiat</small>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-warning mb-0">
+                            <i class="bi bi-currency-bitcoin"></i> {{ product.price_pi }} π
+                        </h3>
+                        <small class="text-muted">Prix en Pi</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quantité -->
+        {% if product.in_stock %}
+        <div class="mb-4">
+            <label class="form-label fw-bold">Quantité</label>
+            <div class="input-group" style="width: 150px;">
+                <button class="btn btn-outline-secondary" type="button" id="decreaseQty">
+                    <i class="bi bi-dash"></i>
+                </button>
+                <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="{{ product.stock }}">
+                <button class="btn btn-outline-secondary" type="button" id="increaseQty">
+                    <i class="bi bi-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="d-grid gap-2 mb-4">
+            <button class="btn btn-pi btn-lg" id="addToCartBtn">
+                <i class="bi bi-cart-plus"></i> Ajouter au Panier
+            </button>
+            <button class="btn btn-outline-success btn-lg" id="buyNowBtn">
+                <i class="bi bi-lightning-charge"></i> Acheter Maintenant
+            </button>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> Ce produit n'est plus disponible pour le moment.
+        </div>
+        {% endif %}
+
+        <!-- Informations Boutique -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-shop"></i> Vendu par</h6>
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-0">{{ product.shop.name }}</h5>
+                        <small class="text-muted">{{ product.shop.address_text }}</small>
+                        {% if product.shop.verified %}
+                        <span class="badge bg-success ms-2">
+                            <i class="bi bi-patch-check"></i> Vérifié
+                        </span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'shop_detail' product.shop.id %}" class="btn btn-outline-primary">
+                        Voir la boutique
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Description -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="bi bi-info-circle"></i> Description du Produit</h4>
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ product.description }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Caractéristiques -->
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-check"></i> Caractéristiques</h5>
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Catégorie:</strong>
+                    <span>{{ product.category.name|default:"Non classé" }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Type:</strong>
+                    <span>{% if product.is_digital %}Digital{% else %}Physique{% endif %}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Stock:</strong>
+                    <span>{{ product.stock }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <strong>Date d'ajout:</strong>
+                    <span>{{ product.created_at|date:"d/m/Y" }}</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-shield-check"></i> Garanties</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i> 
+                        Paiement sécurisé avec escrow
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i> 
+                        Protection de l'acheteur
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i> 
+                        Système de litiges intégré
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success"></i> 
+                        Support client 24/7
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+const productId = parseInt("{{ product.id|escapejs }}");
+const maxStock = parseInt("{{ product.stock|escapejs }}");
+
+// Gestion de la quantité
+document.getElementById('increaseQty').addEventListener('click', function() {
+    const qtyInput = document.getElementById('quantity');
+    if (parseInt(qtyInput.value) < maxStock) {
+        qtyInput.value = parseInt(qtyInput.value) + 1;
+    }
+});
+
+document.getElementById('decreaseQty').addEventListener('click', function() {
+    const qtyInput = document.getElementById('quantity');
+    if (parseInt(qtyInput.value) > 1) {
+        qtyInput.value = parseInt(qtyInput.value) - 1;
+    }
+});
+
+// Ajouter au panier
+document.getElementById('addToCartBtn').addEventListener('click', function() {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = cart.find(item => item.productId === productId);
+    
+    if (existingItem) {
+        existingItem.quantity += quantity;
+    } else {
+        cart.push({
+            productId: productId,
+            quantity: quantity,
+            title: '{{ product.title|escapejs }}',
+            price_fiat: parseFloat('{{ product.price_fiat|stringformat:".2f" }}'.replace(',', '.')),
+            price_pi: parseFloat('{{ product.price_pi|stringformat:".2f" }}'.replace(',', '.')),
+            image: '{% if product.image and product.image.url %}{{ product.image.url }}{% else %}/static/images/placeholder.png{% endif %}'
+        });
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Feedback
+    this.innerHTML = '<i class="bi bi-check-circle"></i> Ajouté au panier !';
+    this.classList.add('btn-success');
+    
+    // Mise à jour du compteur
+    updateCartCount();
+    
+    setTimeout(() => {
+        this.innerHTML = '<i class="bi bi-cart-plus"></i> Ajouter au Panier';
+        this.classList.remove('btn-success');
+    });
+});
+
+
+// Acheter maintenant
+document.getElementById('buyNowBtn').addEventListener('click', function() {
+    // Ajouter au panier puis rediriger
+    document.getElementById('addToCartBtn').click();
+    setTimeout(() => {
+        window.location.href = '/cart/';
+    }, 500);
+});
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cart-count').textContent = count;
+}
+})();
+</script>
+{% endblock %}

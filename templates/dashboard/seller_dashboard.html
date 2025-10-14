@@ -1,0 +1,737 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Ma Boutique - Pi Market{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="bi bi-shop-window"></i> Tableau de Bord Vendeur</h2>
+        <p class="text-muted">Gérez votre boutique et vos commandes</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="/shops/create/" class="btn btn-pi">
+            <i class="bi bi-plus-circle"></i> Créer une Boutique
+        </a>
+    </div>
+</div>
+
+<!-- Stats Vendeur -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-cart text-success fs-1"></i>
+                <h3 class="mt-2" id="totalSales">0</h3>
+                <p class="text-muted mb-0">Ventes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-currency-dollar text-primary fs-1"></i>
+                <h3 class="mt-2" id="totalRevenue">$0</h3>
+                <p class="text-muted mb-0">Revenus</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-box-seam text-info fs-1"></i>
+                <h3 class="mt-2" id="totalProducts">0</h3>
+                <p class="text-muted mb-0">Produits</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-clock-history text-warning fs-1"></i>
+                <h3 class="mt-2" id="pendingSales">0</h3>
+                <p class="text-muted mb-0">En attente</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#orders" type="button">
+            <i class="bi bi-cart-check"></i> Commandes
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#products" type="button">
+            <i class="bi bi-box-seam"></i> Produits
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#shops" type="button">
+            <i class="bi bi-shop"></i> Mes Boutiques
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content">
+    <!-- Commandes -->
+    <div class="tab-pane fade show active" id="orders" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul"></i> Commandes Reçues</h5>
+            </div>
+            <div class="card-body">
+                <div id="sellerOrdersList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Produits -->
+    <div class="tab-pane fade" id="products" role="tabpanel">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-box-seam"></i> Mes Produits</h5>
+                <button class="btn btn-sm btn-pi" id="addProductBtn">
+                    <i class="bi bi-plus"></i> Ajouter un Produit
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="productsList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutiques -->
+    <div class="tab-pane fade" id="shops" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-shop"></i> Mes Boutiques</h5>
+            </div>
+            <div class="card-body">
+                <div id="shopsList">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour Modifier un Produit -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel"><i class="bi bi-pencil-square"></i> Modifier le Produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <div id="edit-modal-error-message" class="alert alert-danger d-none"></div>
+                    <input type="hidden" id="editProductId">
+                    
+                    <div class="mb-3">
+                        <label for="editProductTitle" class="form-label">Titre du produit</label>
+                        <input type="text" class="form-control" id="editProductTitle" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editProductDescription" name="description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductPriceFiat" class="form-label">Prix en Fiat ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="editProductPriceFiat" name="price_fiat" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductPricePi" class="form-label">Prix en Pi (π)</label>
+                            <input type="number" step="0.01" class="form-control" id="editProductPricePi" name="price_pi" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductStock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="editProductStock" name="stock" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductCategory" class="form-label">Catégorie</label>
+                            <select class="form-select" id="editProductCategory" name="category" required>
+                                <!-- Les catégories seront chargées ici -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editProductImage" class="form-label">Changer l'image (optionnel)</label>
+                        <input class="form-control" type="file" id="editProductImage" name="image" accept="image/*">
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="editIsDigital" name="is_digital">
+                        <label class="form-check-label" for="editIsDigital">Produit digital (téléchargeable)</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-pi" id="updateProductBtn">Mettre à jour</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour Ajouter un Produit -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProductModalLabel"><i class="bi bi-plus-circle"></i> Ajouter un Nouveau Produit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div id="modal-error-message" class="alert alert-danger d-none"></div>
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    <div class="mb-3">
+                        <label for="productShop" class="form-label">Choisir une boutique</label>
+                        <select class="form-select" id="productShop" name="shop_id" required>
+                            <!-- Les boutiques de l'utilisateur seront chargées ici -->
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="productTitle" class="form-label">Titre du produit</label>
+                        <input type="text" class="form-control" id="productTitle" name="title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="productDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="productDescription" name="description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="productPriceFiat" class="form-label">Prix en Fiat ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="productPriceFiat" name="price_fiat" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="productPricePi" class="form-label">Prix en Pi (π)</label>
+                            <input type="number" step="0.01" class="form-control" id="productPricePi" name="price_pi" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="productStock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="productStock" name="stock" value="1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="productCategory" class="form-label">Catégorie</label>
+                            <select class="form-select" id="productCategory" name="category" required>
+                                <!-- Les catégories seront chargées ici -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="productImage" class="form-label">Image du produit</label>
+                        <input class="form-control" type="file" id="productImage" name="image" accept="image/*">
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="isDigital" name="is_digital">
+                        <label class="form-check-label" for="isDigital">Produit digital (téléchargeable)</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-pi" id="saveProductBtn">Enregistrer le Produit</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const token = localStorage.getItem('access_token');
+
+if (!token) {
+    window.location.href = '/auth/login/';
+}
+
+// Charger les commandes du vendeur
+async function loadSellerOrders() {
+    try {
+        const response = await fetch('/api/shops/seller/orders/', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+            displaySellerOrders(data.results || data);
+            updateSellerStats(data.results || data);
+        }
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
+}
+
+function displaySellerOrders(orders) {
+    const ordersList = document.getElementById('sellerOrdersList');
+    
+    if (orders.length === 0) {
+        ordersList.innerHTML = `
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <h5 class="mt-3">Aucune commande reçue</h5>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    
+    orders.forEach(order => {
+        html += `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h6>#${order.order_number}</h6>
+                            <small class="text-muted">
+                                <i class="bi bi-person"></i> ${order.buyer.display_name}
+                            </small>
+                            <br>
+                            <small class="text-muted">
+                                ${new Date(order.created_at).toLocaleDateString('fr-FR')}
+                            </small>
+                            <div class="mt-2">
+                                ${getStatusBadge(order.status)}
+                            </div>
+                        </div>
+                        <div class="col-md-5 text-end">
+                            <h5 class="text-success">$${order.total_fiat}</h5>
+                            <div class="mt-2">
+                                ${order.status === 'paid_in_escrow' ? `
+                                    <button class="btn btn-sm btn-primary mark-shipped" 
+                                            data-order-id="${order.id}">
+                                        <i class="bi bi-truck"></i> Marquer Expédié
+                                    </button>
+                                ` : ''}
+                                <a href="/orders/${order.id}/" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Voir
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    ordersList.innerHTML = html;
+    attachSellerActions();
+}
+
+function getStatusBadge(status) {
+    const badges = {
+        'pending_payment': '<span class="badge bg-warning">Attente paiement</span>',
+        'paid_in_escrow': '<span class="badge bg-info">Prêt à expédier</span>',
+        'shipped': '<span class="badge bg-primary">Expédié</span>',
+        'delivered': '<span class="badge bg-success">Livré</span>',
+        'released': '<span class="badge bg-success">Terminé</span>'
+    };
+    return badges[status] || `<span class="badge bg-secondary">${status}</span>`;
+}
+
+function updateSellerStats(orders) {
+    document.getElementById('totalSales').textContent = orders.length;
+    
+    const revenue = orders.filter(o => ['delivered', 'released'].includes(o.status)).reduce((sum, o) => sum + parseFloat(o.total_fiat || 0), 0);
+    document.getElementById('totalRevenue').textContent = '$' + revenue.toFixed(2);
+    
+    const pending = orders.filter(o => 
+        ['paid_in_escrow', 'shipped'].includes(o.status)
+    ).length;
+    document.getElementById('pendingSales').textContent = pending;
+}
+
+function attachSellerActions() {
+    document.querySelectorAll('.mark-shipped').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const tracking = prompt('Numéro de suivi (optionnel):') || '';
+            const carrier = prompt('Transporteur (ex: DHL):') || '';
+            
+            const orderId = this.getAttribute('data-order-id');
+            
+            try {
+                const response = await fetch(`/api/shops/orders/${orderId}/mark-shipped/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        tracking_number: tracking,
+                        carrier: carrier
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Commande marquée comme expédiée !');
+                    loadSellerOrders();
+                } else {
+                    alert('Erreur lors de la mise à jour');
+                }
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+            }
+        });
+    });
+}
+
+// Charger les produits
+async function loadProducts() {
+    try {
+        const response = await fetch('/api/shops/my-products/', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!response.ok) throw new Error('Could not fetch products');
+        const products = await response.json();
+        displayProducts(products.results || products);
+        document.getElementById('totalProducts').textContent = products.count || products.length;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        document.getElementById('productsList').innerHTML = `<div class="alert alert-danger">Erreur de chargement des produits.</div>`;
+    }
+}
+
+function displayProducts(products) {
+    const container = document.getElementById('productsList');
+    if (products.length === 0) {
+        container.innerHTML = `<div class="alert alert-info">Vous n'avez aucun produit. Cliquez sur "Ajouter un Produit" pour commencer.</div>`;
+        return;
+    }
+    let html = '<div class="row g-3">';
+    products.forEach(p => {
+        html += `
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="${p.image || '/static/images/placeholder.png'}" class="card-img-top" style="height: 180px; object-fit: cover;">
+                    <div class="card-body">
+                        <h6 class="card-title">${p.title}</h6>
+                        <p class="card-text small text-muted">
+                            $${p.price_fiat} / ${p.price_pi} π - Stock: ${p.stock}
+                        </p>
+                        <div class="btn-group w-100" role="group">
+                            <button class="btn btn-sm btn-outline-primary edit-product-btn" data-product-id="${p.id}">Modifier</button>
+                            <button class="btn btn-sm btn-outline-danger delete-product-btn" data-product-id="${p.id}">Supprimer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+let addProductModal = null;
+let editProductModal = null;
+
+let myShop = null; // Pour stocker la boutique de l'utilisateur
+let myShopsList = []; // Pour stocker toutes les boutiques de l'utilisateur
+
+// Charger les boutiques
+async function loadShops() {
+    try {
+        // Utiliser un endpoint qui retourne uniquement les boutiques de l'utilisateur
+        const response = await fetch('/api/shops/my-shops/', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!response.ok) throw new Error('Could not fetch shops');
+        const shops = await response.json();
+
+        // L'API retourne un objet paginé, on utilise la clé "results"
+        myShopsList = shops.results || [];
+        myShop = myShopsList.length > 0 ? myShopsList[0] : null;
+
+        displayShops(shops.results);
+    } catch (error) {
+        console.error('Error loading shops:', error);
+        document.getElementById('shopsList').innerHTML = `<div class="alert alert-danger">Erreur de chargement des boutiques.</div>`;
+    }
+}
+
+function displayShops(shops) {
+    const container = document.getElementById('shopsList');
+    if (shops.length === 0) {
+        container.innerHTML = `<div class="alert alert-info">Vous n'avez pas encore de boutique.</div>`;
+        return;
+    }
+    let html = '';
+    shops.forEach(shop => {
+        html += `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>${shop.name}</h5>
+                    <p class="text-muted">${shop.description}</p>
+                <div>
+                    <a href="/shops/${shop.id}/" class="btn btn-sm btn-outline-primary">Voir la boutique</a>
+                    <button class="btn btn-sm btn-outline-danger delete-shop-btn" data-shop-id="${shop.id}">Supprimer</button>
+                </div>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+async function setupAddProductModal() {
+    addProductModal = new bootstrap.Modal(document.getElementById('addProductModal'));
+    const shopSelect = document.getElementById('productShop');
+
+    // Charger les catégories
+    const categorySelect = document.getElementById('productCategory');
+    try {
+        // Remplir le sélecteur de boutiques
+        if (myShopsList.length > 0) {
+            shopSelect.innerHTML = ''; // Vider les options existantes
+            myShopsList.forEach(shop => {
+                shopSelect.innerHTML += `<option value="${shop.id}">${shop.name}</option>`;
+            });
+        } else {
+            shopSelect.innerHTML = '<option value="">Veuillez d\'abord créer une boutique</option>';
+        }
+
+        const response = await fetch('/api/shops/categories/', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await response.json();
+        const categories = data.results || data; // Gérer la réponse paginée
+        categorySelect.innerHTML = '<option value="">-- Choisir une catégorie --</option>'; // Vider et ajouter une option par défaut
+        categories.forEach(cat => {
+            categorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+        });
+    } catch (error) {
+        console.error('Could not load categories', error);
+    }
+
+    // Ouvrir le modal
+    document.getElementById('addProductBtn').addEventListener('click', () => {
+        if (myShopsList.length === 0) {
+            alert("Veuillez d'abord créer une boutique.");
+            return;
+        }
+        addProductModal.show();
+    });
+
+    // Sauvegarder le produit
+    document.getElementById('saveProductBtn').addEventListener('click', async function() {
+        const form = document.getElementById('addProductForm');
+        const formData = new FormData(form);
+        const selectedShopId = document.getElementById('productShop').value;
+        
+        // L'API attend `category`, pas `category_id`
+        formData.set('category', formData.get('category'));
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Sauvegarde...`;
+
+        try {
+            const response = await fetch(`/api/shops/${selectedShopId}/products/`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+
+            if (response.ok) {
+                addProductModal.hide();
+                form.reset();
+                loadProducts(); // Recharger la liste des produits
+            } else {
+                const result = await response.json();
+                const errorDiv = document.getElementById('modal-error-message');
+                errorDiv.textContent = 'Erreur: ' + JSON.stringify(result);
+                errorDiv.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error('Error saving product:', error);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Enregistrer le Produit';
+        }
+    });
+}
+
+async function setupEditProductModal() {
+    editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    const categorySelect = document.getElementById('editProductCategory');
+
+    // Charger les catégories dans le modal de modification
+    try {
+        const response = await fetch('/api/shops/categories/', { headers: { 'Authorization': 'Bearer ' + token } });
+        const data = await response.json();
+        const categories = data.results || data; // Gérer la réponse paginée
+        categorySelect.innerHTML = '<option value="">-- Choisir une catégorie --</option>';
+        categories.forEach(cat => {
+            categorySelect.innerHTML += `<option value="${cat.id}">${cat.name}</option>`;
+        });
+    } catch (error) {
+        console.error('Could not load categories for edit modal', error);
+    }
+
+    // Gérer le clic sur le bouton "Modifier"
+    document.getElementById('productsList').addEventListener('click', async function(e) {
+        if (e.target.classList.contains('edit-product-btn')) {
+            const productId = e.target.dataset.productId;
+            
+            // Récupérer les détails du produit
+            const response = await fetch(`/api/shops/products/${productId}/`, { headers: { 'Authorization': 'Bearer ' + token } });
+            const product = await response.json();
+
+            // Remplir le formulaire
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('editProductTitle').value = product.title;
+            document.getElementById('editProductDescription').value = product.description;
+            document.getElementById('editProductPriceFiat').value = product.price_fiat;
+            document.getElementById('editProductPricePi').value = product.price_pi;
+            document.getElementById('editProductStock').value = product.stock;
+            document.getElementById('editProductCategory').value = product.category;
+            document.getElementById('editIsDigital').checked = product.is_digital;
+
+            editProductModal.show();
+        }
+    });
+
+    // Gérer la sauvegarde des modifications
+    document.getElementById('updateProductBtn').addEventListener('click', async function() {
+        const productId = document.getElementById('editProductId').value;
+        const form = document.getElementById('editProductForm');
+        const formData = new FormData(form);
+
+        // L'API attend `category`
+        formData.set('category', document.getElementById('editProductCategory').value);
+
+        const btn = this;
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Mise à jour...`;
+
+        try {
+            const response = await fetch(`/api/shops/products/${productId}/manage/`, {
+                method: 'PUT', // ou PATCH si vous ne mettez à jour que certains champs
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+
+            if (response.ok) {
+                editProductModal.hide();
+                loadProducts(); // Recharger la liste
+            } else {
+                const result = await response.json();
+                const errorDiv = document.getElementById('edit-modal-error-message');
+                errorDiv.textContent = 'Erreur: ' + JSON.stringify(result);
+                errorDiv.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error('Error updating product:', error);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Mettre à jour';
+        }
+    });
+}
+
+function setupProductActionListeners() {
+    const productListContainer = document.getElementById('productsList');
+
+    productListContainer.addEventListener('click', async function(e) {
+        const target = e.target.closest('button');
+        if (!target) return;
+
+        const productId = target.dataset.productId;
+
+        // Gérer la suppression
+        if (target.classList.contains('delete-product-btn')) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
+                try {
+                    const response = await fetch(`/api/shops/products/${productId}/manage/`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    if (response.ok) {
+                        loadProducts(); // Recharger la liste
+                    } else {
+                        alert('Erreur lors de la suppression.');
+                    }
+                } catch (error) {
+                    console.error('Error deleting product:', error);
+                }
+            }
+        }
+    });
+}
+
+function setupShopActionListeners() {
+    const shopsListContainer = document.getElementById('shopsList');
+
+    shopsListContainer.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('delete-shop-btn')) {
+            const shopId = e.target.dataset.shopId;
+            
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette boutique ? Tous les produits associés seront également supprimés. Cette action est irréversible.')) {
+                try {
+                    const response = await fetch(`/api/shops/${shopId}/`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+
+                    if (response.ok) {
+                        // Recharger la liste des boutiques et des produits
+                        await loadShops();
+                        await loadProducts();
+                    } else {
+                        const result = await response.json();
+                        alert('Erreur lors de la suppression de la boutique: ' + JSON.stringify(result));
+                    }
+                } catch (error) {
+                    console.error('Error deleting shop:', error);
+                    alert('Une erreur réseau est survenue.');
+                }
+            }
+        }
+    });
+}
+
+// Event listeners tabs
+document.querySelector('[data-bs-target="#products"]').addEventListener('click', loadProducts);
+document.querySelector('[data-bs-target="#shops"]').addEventListener('click', loadShops);
+
+// Initialisation au chargement de la page
+async function initializeDashboard() {
+    loadSellerOrders();
+    await loadShops(); // Attendre que les boutiques soient chargées
+    await setupAddProductModal(); // Initialiser le modal APRÈS avoir les infos de la boutique
+    await setupEditProductModal(); // Initialiser le modal de modification
+    setupProductActionListeners(); // Attacher les écouteurs pour les actions sur les produits
+    setupShopActionListeners(); // Attacher les écouteurs pour les actions sur les boutiques
+}
+
+initializeDashboard();
+</script>
+{% endblock %}

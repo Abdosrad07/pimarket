@@ -1,0 +1,278 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Finaliser la Commande - Pi Market{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-credit-card"></i> Finaliser la Commande</h2>
+
+<div class="row">
+    <!-- Formulaire de Livraison -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-truck"></i> Informations de Livraison</h5>
+            </div>
+            <div class="card-body">
+                <form id="checkoutForm">
+                    <div class="mb-3">
+                        <label class="form-label">Adresse de Livraison</label>
+                        <textarea class="form-control" id="shipping_address" rows="3" 
+                                  placeholder="Entrez votre adresse complète" required></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Latitude</label>
+                            <input type="text" class="form-control" id="latitude" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Longitude</label>
+                            <input type="text" class="form-control" id="longitude" readonly>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary mb-3" id="getLocationBtn">
+                        <i class="bi bi-crosshair"></i> Utiliser ma Position Actuelle
+                    </button>
+
+                    <div class="mb-3">
+                        <label class="form-label">Notes (optionnel)</label>
+                        <textarea class="form-control" id="notes" rows="2" 
+                                  placeholder="Instructions spéciales pour la livraison..."></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Méthode de Paiement -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-wallet2"></i> Méthode de Paiement</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="paymentMethod" 
+                           id="paymentFiat" value="fiat" checked>
+                    <label class="form-check-label" for="paymentFiat">
+                        <strong>💵 Paiement en Fiat (Stripe)</strong>
+                        <br>
+                        <small class="text-muted">Cartes bancaires, mode test disponible</small>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="paymentMethod" 
+                           id="paymentPi" value="pi">
+                    <label class="form-check-label" for="paymentPi">
+                        <strong>🥧 Paiement en Pi</strong>
+                        <br>
+                        <small class="text-muted">Payez avec votre crypto Pi</small>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résumé Commande -->
+    <div class="col-md-4">
+        <div class="card sticky-top" style="top: 100px;">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Récapitulatif</h5>
+            </div>
+            <div class="card-body">
+                <div id="orderItems"></div>
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Sous-total:</span>
+                    <strong id="subtotal">$0.00</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Frais de livraison:</span>
+                    <strong class="text-success">Gratuit</strong>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total:</strong>
+                    <div class="text-end">
+                        <strong class="text-primary d-block" id="totalFiat">$0.00</strong>
+                        <strong class="text-warning d-block" id="totalPi">0 π</strong>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-pi btn-lg" id="placeOrderBtn">
+                        <i class="bi bi-check-circle"></i> Confirmer la Commande
+                    </button>
+                    <a href="{% url 'cart' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Retour au Panier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+// Vérifier si le panier est vide
+if (cart.length === 0) {
+    window.location.href = '/cart/';
+}
+
+// Obtenir la position
+document.getElementById('getLocationBtn').addEventListener('click', function() {
+    const btn = this;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Obtention...';
+    btn.disabled = true;
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+            document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Position Obtenue';
+            btn.classList.add('btn-success');
+        },
+        function(error) {
+            alert('Erreur de géolocalisation: ' + error.message);
+            btn.innerHTML = '<i class="bi bi-crosshair"></i> Réessayer';
+            btn.disabled = false;
+        }
+    );
+});
+
+// Charger le récapitulatif
+async function loadOrderSummary() {
+    let html = '';
+    let totalFiat = 0;
+    let totalPi = 0;
+
+    for (const item of cart) {
+        try {
+            const response = await fetch(`/api/shops/products/${item.productId}/`);
+            const product = await response.json();
+
+            const itemTotal = product.price_fiat * item.quantity;
+            const itemTotalPi = product.price_pi * item.quantity;
+            totalFiat += parseFloat(itemTotal);
+            totalPi += parseFloat(itemTotalPi);
+
+            html += `
+                <div class="d-flex justify-content-between mb-2">
+                    <small>${product.title} x${item.quantity}</small>
+                    <small>$${itemTotal.toFixed(2)}</small>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Erreur:', error);
+        }
+    }
+
+    document.getElementById('orderItems').innerHTML = html;
+    document.getElementById('subtotal').textContent = `$${totalFiat.toFixed(2)}`;
+    document.getElementById('totalFiat').textContent = `$${totalFiat.toFixed(2)}`;
+    document.getElementById('totalPi').textContent = `${totalPi.toFixed(2)} π`;
+}
+
+// Passer la commande
+document.getElementById('placeOrderBtn').addEventListener('click', async function() {
+    const token = localStorage.getItem('access_token');
+    
+    if (!token) {
+        alert('Vous devez être connecté pour passer une commande');
+        window.location.href = '/auth/login/';
+        return;
+    }
+
+    const shipping_address = document.getElementById('shipping_address').value;
+    if (!shipping_address) {
+        alert('Veuillez entrer une adresse de livraison');
+        return;
+    }
+
+    const btn = this;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Traitement...';
+    btn.disabled = true;
+
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    // Préparer les items
+    const items = cart.map(item => ({
+        product_id: item.productId,
+        quantity: item.quantity
+    }));
+
+    const orderData = {
+        items: items,
+        currency: paymentMethod,
+        shipping_address: shipping_address,
+        shipping_latitude: document.getElementById('latitude').value || null,
+        shipping_longitude: document.getElementById('longitude').value || null,
+        notes: document.getElementById('notes').value
+    };
+
+    try {
+        // Créer la commande
+        const response = await fetch('/api/shops/orders/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Commande créée avec succès
+            const orderId = result.order.id;
+            
+            // Créer le paiement
+            const paymentResponse = await fetch(`/api/payments/create/${orderId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            const paymentResult = await paymentResponse.json();
+
+            if (paymentResponse.ok) {
+                // Vider le panier
+                localStorage.removeItem('cart');
+                
+                // Rediriger selon la méthode de paiement
+                if (paymentMethod === 'fiat') {
+                    alert('Commande créée ! Redirection vers le paiement Stripe...');
+                    // TODO: Intégrer Stripe Checkout
+                    window.location.href = `/orders/${orderId}/`;
+                } else {
+                    alert('Commande créée ! Simulez le paiement Pi avec la commande manage.py');
+                    window.location.href = `/orders/${orderId}/`;
+                }
+            } else {
+                alert('Erreur lors de la création du paiement: ' + JSON.stringify(paymentResult));
+                btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la Commande';
+                btn.disabled = false;
+            }
+        } else {
+            alert('Erreur: ' + (result.error || JSON.stringify(result)));
+            btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la Commande';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la Commande';
+        btn.disabled = false;
+    }
+});
+
+// Charger au démarrage
+loadOrderSummary();
+</script>
+{% endblock %}

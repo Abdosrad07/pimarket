@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon Compte - Pi Market{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-5">Bienvenue, <span id="dashboard-username">...</span> !</h1>
+    <p class="lead text-muted">Gérez toutes vos activités sur Pi Market depuis cet espace.</p>
+</div>
+
+<div class="row g-4">
+    <!-- Section Achat -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-bag-check-fill text-primary" style="font-size: 3rem;"></i>
+                <h4 class="card-title mt-3">Mes Achats</h4>
+                <p class="card-text">Suivez vos commandes, consultez votre historique d'achats et gérez vos informations de livraison.</p> 
+                <a href="{% url 'buyer_dashboard' %}" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-in-right"></i> Accéder à mes commandes
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Vente -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-shop-window text-success" style="font-size: 3rem;"></i>
+                <h4 class="card-title mt-3">Ma Boutique</h4>
+                <div id="seller-section-content">
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('access_token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token || !user) {
+        // Si l'utilisateur n'est pas connecté, le rediriger vers la page de connexion
+        window.location.href = "{% url 'login' %}?next=" + encodeURIComponent(window.location.pathname);
+        return;
+    }
+
+    // Mettre à jour le nom d'utilisateur
+    document.getElementById('dashboard-username').textContent = user.display_name;
+
+    // Charger les informations de la boutique de l'utilisateur
+    async function loadShopInfo() {
+        try {
+            const response = await fetch('/api/shops/my-shops/', {
+                headers: {
+                    'Authorization': 'Bearer ' + token 
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Could not fetch shop info');
+            }
+
+            const shops = await response.json();
+            const userShop = shops.length > 0 ? shops[0] : null;
+            const sellerSection = document.getElementById('seller-section-content');
+
+            if (userShop) {
+                sellerSection.innerHTML = `
+                    <p class="card-text">Gérez votre boutique "${userShop.name}", ajoutez des produits et suivez vos ventes.</p>
+                    <a href="{% url 'seller_dashboard' %}" class="btn btn-success">
+                        <i class="bi bi-speedometer2"></i> Gérer ma boutique
+                    </a>
+                `;
+            } else {
+                sellerSection.innerHTML = `
+                    <p class="card-text">Gérez vos produits, suivez vos ventes et créez votre boutique depuis votre espace vendeur.</p>
+                    <a href="{% url 'seller_dashboard' %}" class="btn btn-success">
+                        <i class="bi bi-arrow-right-circle"></i> Accéder à l'espace vente
+                    </a>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading shop info:', error);
+            document.getElementById('seller-section-content').innerHTML = `<div class="text-danger">Erreur de chargement des informations de la boutique.</div>`;
+        }
+    }
+
+    loadShopInfo();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,162 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Vérification OTP - Pi Market{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mb-4">
+            <i class="bi bi-shield-check" style="font-size: 4rem; color: var(--pi-purple);"></i>
+            <h2 class="mt-3">Vérification OTP</h2>
+            <p class="text-muted">Entrez le code envoyé à votre téléphone</p>
+            <p class="fw-bold" id="phoneDisplay"></p>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form id="otpForm">
+                    <div class="mb-4">
+                        <label for="otp" class="form-label text-center w-100">
+                            <i class="bi bi-key"></i> Code OTP (6 chiffres)
+                        </label>
+                        <input type="text" class="form-control form-control-lg text-center" 
+                               id="otp" placeholder="000000" maxlength="6" 
+                               pattern="[0-9]{6}" required 
+                               style="font-size: 2rem; letter-spacing: 0.5rem;">
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i>
+                        <strong>Mode Test:</strong> Le code OTP est affiché dans les logs du serveur.
+                        <br><small>Vérifiez le terminal Docker pour voir le code.</small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-pi btn-lg" id="verifyBtn">
+                            <i class="bi bi-check-circle"></i> Vérifier
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="resendBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Renvoyer le Code
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'register' %}" class="text-decoration-none">
+                        <i class="bi bi-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Récupérer le numéro de téléphone depuis sessionStorage
+const phoneNumber = sessionStorage.getItem('phone_number');
+
+if (!phoneNumber) {
+    window.location.href = '/auth/register/';
+}
+
+document.getElementById('phoneDisplay').textContent = phoneNumber;
+
+// Vérifier l'OTP
+document.getElementById('otpForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const verifyBtn = document.getElementById('verifyBtn');
+    verifyBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Vérification...';
+    verifyBtn.disabled = true;
+
+    const otp = document.getElementById('otp').value;
+
+    try {
+        const response = await fetch('/api/accounts/verify-otp/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                phone_number: phoneNumber,
+                otp: otp
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Sauvegarder le token JWT
+            localStorage.setItem('access_token', result.access);
+            localStorage.setItem('refresh_token', result.refresh);
+            localStorage.setItem('user', JSON.stringify(result.user));
+            
+            // Envoyer la localisation si disponible
+            const lat = sessionStorage.getItem('latitude');
+            const lng = sessionStorage.getItem('longitude');
+            
+            if (lat && lng) {
+                await fetch('/api/accounts/update-location/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + result.access
+                    },
+                    body: JSON.stringify({
+                        latitude: lat,
+                        longitude: lng,
+                        is_current: true
+                    })
+                });
+            }
+            
+            // Nettoyer sessionStorage
+            sessionStorage.clear();
+            
+            // Rediriger vers l'accueil
+            window.location.href = '/';
+        } else {
+            alert('Code OTP invalide: ' + (result.error || result.detail));
+            verifyBtn.innerHTML = '<i class="bi bi-check-circle"></i> Vérifier';
+            verifyBtn.disabled = false;
+        }
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+        verifyBtn.innerHTML = '<i class="bi bi-check-circle"></i> Vérifier';
+        verifyBtn.disabled = false;
+    }
+});
+
+// Renvoyer le code OTP
+document.getElementById('resendBtn').addEventListener('click', async function() {
+    const btn = this;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Envoi...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/accounts/send-otp/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                phone_number: phoneNumber
+            })
+        });
+
+        if (response.ok) {
+            alert('Code OTP renvoyé ! Vérifiez les logs du serveur.');
+        } else {
+            alert('Erreur lors de l\'envoi du code');
+        }
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+    } finally {
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Renvoyer le Code';
+        btn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

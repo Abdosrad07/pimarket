@@ -1,0 +1,215 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Produits - Pi Market{% endblock %}
+
+{% block content %}
+<!-- Filtres et Recherche -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-4"><i class="bi bi-grid-3x3-gap"></i> Tous les Produits</h2>
+        
+        <div class="card">
+            <div class="card-body">
+                <form method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" name="q" 
+                               placeholder="🔍 Rechercher un produit..." 
+                               value="{{ request.GET.q }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="category">
+                            <option value="">Toutes les catégories</option>
+                            {% for category in categories %}
+                             <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>
+
+                                    {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+         </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="sort">
+                            <option value="">Trier par...</option>
+                            <option value="price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>
+                                Prix croissant
+                            </option>
+                            <option value="price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>
+                                Prix décroissant
+                            </option>
+                            <option value="recent" {% if request.GET.sort == 'recent' %}selected{% endif %}>
+                                Plus récents
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-pi w-100">
+                            <i class="bi bi-funnel"></i> Filtrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Produits -->
+<div class="row g-4">
+    {% for product in products %}
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card product-card h-100"> 
+            {% if product.image and product.image.url %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 250px; object-fit: cover;">
+            {% else %}
+            <img src="/static/images/placeholder.png" class="card-img-top" alt="Image non disponible" style="height: 250px; object-fit: cover;">
+            {% endif %}
+            
+            <div class="card-body">
+                <h5 class="card-title">{{ product.title }}</h5>
+                <p class="card-text text-muted small">
+                    {{ product.description|truncatewords:10 }}
+                </p>
+                
+                <div class="mb-2">
+                    <i class="bi bi-shop text-muted"></i>
+                    <small class="text-muted">{{ product.shop.name }}</small>
+                </div>
+                
+                {% if product.distance %}
+                <div class="mb-2">
+                    <i class="bi bi-geo-alt text-primary"></i>
+                    <small class="text-muted">À {{ product.distance }} km</small>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <strong class="text-primary fs-5">${{ product.price_fiat }}</strong>
+                        <br>
+                        <small class="text-muted">
+                             {{ product.price_pi }} π
+                        </small>
+                    </div>
+                    {% if product.in_stock %}
+                    <span class="badge bg-success">Disponible</span>
+                    {% else %}
+                    <span class="badge bg-danger">Épuisé</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card-footer bg-white border-0 d-grid gap-2">
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-pi">
+                    <i class="bi bi-eye"></i> Voir Détails
+                </a>
+                {% if product.in_stock %}
+                <button class="btn btn-outline-success btn-sm add-to-cart" data-product-id="{{ product.id }}">
+                    <i class="bi bi-cart-plus"></i> Ajouter au Panier
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-inbox fs-1"></i>
+            <h4 class="mt-3">Aucun produit trouvé</h4>
+            <p>Essayez de modifier vos critères de recherche</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if products.has_other_pages %}
+<nav class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if products.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                Précédent
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in products.paginator.page_range %}
+        <li class="page-item {% if products.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                {{ num }}
+            </a>
+        </li>
+        {% endfor %}
+        
+        {% if products.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                Suivant
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Ajouter au panier
+document.querySelectorAll('.add-to-cart').forEach(button => {
+    button.addEventListener('click', async function() {
+        const productId = this.getAttribute('data-product-id');
+        
+        // Récupérer le panier actuel
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        
+        // Vérifier si le produit est déjà dans le panier
+        const existingItem = cart.find(item => item.productId === productId);
+
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            // Récupérer les détails du produit depuis l'API
+            try {
+                const response = await fetch(`/api/shops/products/${productId}/`);
+                const product = await response.json();
+                cart.push({
+                    productId: productId,
+                    quantity: 1,
+                    title: product.title,
+                    price_fiat: product.price_fiat,
+                    price_pi: product.price_pi,
+                    image: product.image || '/static/images/placeholder.png'
+                });
+            } catch (error) {
+                console.error("Impossible de récupérer les détails du produit:", error);
+                alert("Erreur lors de l'ajout au panier.");
+                return;
+            }
+        }
+        
+        // Sauvegarder
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Feedback visuel
+        this.innerHTML = '<i class="bi bi-check-circle"></i> Ajouté !';
+        this.classList.remove('btn-outline-success');
+        this.classList.add('btn-success');
+        
+        // Mettre à jour le compteur du panier
+        updateCartCount();
+        
+        // Réinitialiser après 2 secondes
+        setTimeout(() => {
+            this.innerHTML = '<i class="bi bi-cart-plus"></i> Ajouter au Panier';
+            this.classList.remove('btn-success');
+            this.classList.add('btn-outline-success');
+        }, 2000);
+    });
+});
+
+function updateCartCount() {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    document.getElementById('cart-count').textContent = cart.length;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+
+{% block title %}Commande - Pi Market{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'buyer_dashboard' %}">Mes Commandes</a></li>
+                <li class="breadcrumb-item active">Détails</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div id="orderDetails">
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Chargement des détails...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const orderId = parseInt("{{ order_id|default:'0' }}");
+const token = localStorage.getItem('access_token');
+
+if (!token) {
+    window.location.href = '/auth/login/';
+}
+
+async function loadOrderDetails() {
+    try {
+        const response = await fetch(`/api/shops/orders/${orderId}/`, {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Commande non trouvée');
+        }
+
+        const order = await response.json();
+        displayOrderDetails(order);
+    } catch (error) {
+        document.getElementById('orderDetails').innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i> ${error.message}
+            </div>
+        `;
+    }
+}
+
+function displayOrderDetails(order) {
+    const statusInfo = getStatusInfo(order.status);
+    
+    let html = `
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="bi bi-receipt"></i> Commande #${order.order_number}</h2>
+                <p class="text-muted">
+                    Créée le ${new Date(order.created_at).toLocaleDateString('fr-FR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })}
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <h3 class="mb-0">${statusInfo.badge}</h3>
+                <small class="text-muted">${statusInfo.text}</small>
+            </div>
+        </div>
+
+        <!-- Timeline du statut -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5><i class="bi bi-clock-history"></i> Suivi de Commande</h5>
+                <div class="timeline mt-4">
+                    ${getTimeline(order)}
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Détails Commande -->
+            <div class="col-md-8">
+                <!-- Articles -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-box-seam"></i> Articles Commandés</h5>
+                    </div>
+                    <div class="card-body">
+                        ${order.items.map(item => `
+                            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                                <div class="flex-shrink-0">
+                                    ${item.product_image ? 
+                                        `<img src="${item.product_image}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">` :
+                                        `<div class="bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; border-radius: 8px;">
+                                            <i class="bi bi-image text-muted fs-2"></i>
+                                        </div>`
+                                    }
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6>${item.product_title}</h6>
+                                    <small class="text-muted">Quantité: ${item.quantity}</small>
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-primary">$${item.subtotal_fiat}</strong>
+                                    <br>
+                                    <small class="text-warning">${item.subtotal_pi} π</small>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- Informations Livraison -->
+                ${order.shipping_address ? `
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="bi bi-truck"></i> Informations de Livraison</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Adresse:</strong><br>${order.shipping_address}</p>
+                        ${order.delivery ? `
+                            <hr>
+                            <p><strong>Statut:</strong> ${getDeliveryStatus(order.delivery.status)}</p>
+                            ${order.delivery.tracking_number ? `
+                                <p><strong>Numéro de suivi:</strong> ${order.delivery.tracking_number}</p>
+                                <p><strong>Transporteur:</strong> ${order.delivery.carrier || 'N/A'}</p>
+                            ` : ''}
+                        ` : ''}
+                    </div>
+                </div>
+                ` : ''}
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5><i class="bi bi-gear"></i> Actions</h5>
+                        <div class="d-grid gap-2">
+                            ${order.status === 'shipped' ? `
+                                <button class="btn btn-success" id="confirmDeliveryBtn">
+                                    <i class="bi bi-check-circle"></i> Confirmer la Réception
+                                </button>
+                            ` : ''}
+                            ${['paid_in_escrow', 'shipped', 'delivered'].includes(order.status) ? `
+                                <button class="btn btn-warning" id="openDisputeBtn">
+                                    <i class="bi bi-exclamation-triangle"></i> Ouvrir un Litige
+                                </button>
+                            ` : ''}
+                            <a href="/dashboard/buyer/" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Retour à Mes Commandes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résumé -->
+            <div class="col-md-4">
+                <div class="card sticky-top" style="top: 100px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-receipt-cutoff"></i> Résumé</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Sous-total:</span>
+                            <strong>$${order.total_fiat}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Frais de livraison:</span>
+                            <strong class="text-success">Gratuit</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>Total:</strong>
+                            <div class="text-end">
+                                <strong class="text-primary d-block">$${order.total_fiat}</strong>
+                                <strong class="text-warning d-block">${order.total_pi} π</strong>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <small class="text-muted">
+                                <i class="bi bi-credit-card"></i> 
+                                Payé en ${order.currency === 'fiat' ? 'Fiat (Stripe)' : 'Pi'}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light">
+                        <h6><i class="bi bi-shop"></i> Boutique</h6>
+                        <p class="mb-0"><strong>${order.shop.name}</strong></p>
+                        <small class="text-muted">${order.shop.address_text}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('orderDetails').innerHTML = html;
+    attachOrderActions(order);
+}
+
+function getStatusInfo(status) {
+    const statusMap = {
+        'created': { badge: '<span class="badge bg-secondary">Créée</span>', text: 'Commande créée' },
+        'pending_payment': { badge: '<span class="badge bg-warning">En attente</span>', text: 'En attente de paiement' },
+        'paid_in_escrow': { badge: '<span class="badge bg-info">Payé</span>', text: 'Paiement sécurisé en escrow' },
+        'shipped': { badge: '<span class="badge bg-primary">Expédié</span>', text: 'Commande en cours de livraison' },
+        'delivered': { badge: '<span class="badge bg-success">Livré</span>', text: 'Commande livrée' },
+        'released': { badge: '<span class="badge bg-success">Terminé</span>', text: 'Transaction complétée' },
+        'disputed': { badge: '<span class="badge bg-danger">Litige</span>', text: 'Litige en cours' },
+        'refunded': { badge: '<span class="badge bg-secondary">Remboursé</span>', text: 'Commande remboursée' },
+        'cancelled': { badge: '<span class="badge bg-dark">Annulé</span>', text: 'Commande annulée' }
+    };
+    return statusMap[status] || { badge: `<span class="badge bg-secondary">${status}</span>`, text: status };
+}
+
+function getTimeline(order) {
+    const steps = [
+        { status: 'created', icon: 'bi-cart-check', label: 'Commande créée', date: order.created_at },
+        { status: 'paid_in_escrow', icon: 'bi-credit-card', label: 'Paiement reçu', date: order.paid_at },
+        { status: 'shipped', icon: 'bi-truck', label: 'Expédié', date: order.shipped_at },
+        { status: 'delivered', icon: 'bi-box-seam', label: 'Livré', date: order.delivered_at },
+        { status: 'released', icon: 'bi-check-circle', label: 'Terminé', date: null }
+    ];
+
+    const currentIndex = steps.findIndex(s => s.status === order.status);
+
+    return steps.map((step, index) => {
+        const isCompleted = index <= currentIndex;
+        const isCurrent = index === currentIndex;
+        
+        return `
+            <div class="d-flex align-items-start mb-3">
+                <div class="flex-shrink-0">
+                    <div class="timeline-icon ${isCompleted ? 'bg-success' : 'bg-secondary'} text-white rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 40px; height: 40px;">
+                        <i class="bi ${step.icon}"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-0 ${isCurrent ? 'text-primary' : ''}">${step.label}</h6>
+                    ${step.date ? `<small class="text-muted">${new Date(step.date).toLocaleDateString('fr-FR')}</small>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function getDeliveryStatus(status) {
+    const statusMap = {
+        'pending': 'En attente',
+        'in_transit': 'En transit',
+        'out_for_delivery': 'En cours de livraison',
+        'delivered': 'Livré',
+        'failed': 'Échec de livraison'
+    };
+    return statusMap[status] || status;
+}
+
+function attachOrderActions(order) {
+    // Confirmer réception
+    const confirmBtn = document.getElementById('confirmDeliveryBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async function() {
+            if (!confirm('Confirmez-vous avoir reçu cette commande ?')) return;
+            
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Confirmation...';
+            
+            try {
+                const response = await fetch(`/api/shops/orders/${orderId}/confirm-delivery/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Livraison confirmée ! L\'escrow sera libéré au vendeur.');
+                    loadOrderDetails();
+                } else {
+                    alert('Erreur lors de la confirmation');
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la Réception';
+                }
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la Réception';
+            }
+        });
+    }
+    
+    // Ouvrir litige
+    const disputeBtn = document.getElementById('openDisputeBtn');
+    if (disputeBtn) {
+        disputeBtn.addEventListener('click', async function() {
+            const reason = prompt('Décrivez le problème rencontré:');
+            if (!reason || reason.trim() === '') return;
+            
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Ouverture...';
+            
+            try {
+                const response = await fetch('/api/shops/disputes/open/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        order_id: orderId,
+                        reason: reason
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Litige ouvert avec succès. Notre équipe va examiner votre demande.');
+                    loadOrderDetails();
+                } else {
+                    const data = await response.json();
+                    alert('Erreur: ' + (data.error || 'Impossible d\'ouvrir le litige'));
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Ouvrir un Litige';
+                }
+            } catch (error) {
+                alert('Erreur: ' + error.message);
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Ouvrir un Litige';
+            }
+        });
+    }
+}
+
+// Charger au démarrage
+loadOrderDetails();
+</script>
+
+<style>
+.timeline-icon {
+    transition: all 0.3s ease;
+}
+.timeline-icon:hover {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}

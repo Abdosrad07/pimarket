@@ -1,0 +1,154 @@
+﻿﻿{% extends 'base.html' %}
+
+{% block title %}Inscription - Pi Market{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="text-center mb-4">
+            <i class="bi bi-person-plus-fill" style="font-size: 4rem; color: var(--pi-purple);"></i>
+            <h2 class="mt-3">Créer un Compte</h2>
+            <p class="text-muted">Rejoignez Pi Market et commencez à trader</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">
+                            <i class="bi bi-phone"></i> Numéro de Téléphone
+                        </label>
+                        <input type="tel" class="form-control form-control-lg" id="phone_number" 
+                               placeholder="+221XXXXXXXXX" required>
+                        <small class="text-muted">Format: +221XXXXXXXXX (avec indicatif pays)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="display_name" class="form-label">
+                            <i class="bi bi-person"></i> Nom d'Affichage
+                        </label>
+                        <input type="text" class="form-control form-control-lg" id="display_name" 
+                               placeholder="Votre nom" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="latitude" class="form-label">
+                            <i class="bi bi-geo-alt"></i> Localisation
+                        </label>
+                        <button type="button" class="btn btn-outline-secondary w-100" id="getLocationBtn">
+                            <i class="bi bi-crosshair"></i> Obtenir ma Position
+                        </button>
+                        <input type="hidden" id="latitude">
+                        <input type="hidden" id="longitude">
+                        <small class="text-success d-none" id="locationStatus">
+                            <i class="bi bi-check-circle"></i> Position obtenue
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-pi btn-lg" id="submitBtn">
+                            <i class="bi bi-arrow-right-circle"></i> Continuer
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p class="text-muted">
+                        Déjà inscrit ? 
+                        <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Se connecter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('getLocationBtn').addEventListener('click', function() {
+    const btn = this;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Obtention...';
+    btn.disabled = true;
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                document.getElementById('latitude').value = position.coords.latitude;
+                document.getElementById('longitude').value = position.coords.longitude;
+                document.getElementById('locationStatus').classList.remove('d-none');
+                btn.innerHTML = '<i class="bi bi-check-circle"></i> Position obtenue';
+                btn.classList.remove('btn-outline-secondary');
+                btn.classList.add('btn-success');
+            },
+            function(error) {
+                alert('Erreur de géolocalisation: ' + error.message);
+                btn.innerHTML = '<i class="bi bi-crosshair"></i> Réessayer';
+                btn.disabled = false;
+            }
+        );
+    } else {
+        alert('La géolocalisation n\'est pas supportée par votre navigateur');
+        btn.disabled = false;
+    }
+});
+
+document.getElementById('registerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Inscription...';
+    submitBtn.disabled = true;
+
+    const data = {
+        phone_number: document.getElementById('phone_number').value,
+        display_name: document.getElementById('display_name').value
+    };
+
+    try {
+        const response = await fetch('/api/accounts/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Sauvegarder les tokens JWT et les informations utilisateur
+            localStorage.setItem('access_token', result.access);
+            localStorage.setItem('refresh_token', result.refresh);
+            localStorage.setItem('user', JSON.stringify(result.user));
+            
+            // Sauvegarder la localisation si disponible
+            const lat = document.getElementById('latitude').value;
+            const lng = document.getElementById('longitude').value;
+            if (lat && lng) {
+                // Envoyer la localisation directement
+                await fetch('/api/accounts/update-location/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + result.access
+                    },
+                    body: JSON.stringify({ latitude: lat, longitude: lng, is_current: true })
+                });
+            }
+            
+            // Rediriger vers le tableau de bord unifié
+            window.location.href = "{% url 'account_dashboard' %}";
+        } else {
+            alert('Erreur: ' + (result.error || JSON.stringify(result)));
+            submitBtn.innerHTML = '<i class="bi bi-arrow-right-circle"></i> Continuer';
+            submitBtn.disabled = false;
+        }
+    } catch (error) {
+        alert('Erreur de connexion: ' + error.message);
+        submitBtn.innerHTML = '<i class="bi bi-arrow-right-circle"></i> Continuer';
+        submitBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

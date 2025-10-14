@@ -1,0 +1,188 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Mes Commandes - Pi Market{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-speedometer2"></i> Tableau de Bord Acheteur</h2>
+        <p class="text-muted">Gérez vos commandes et suivez vos achats</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-cart-check text-primary fs-1"></i>
+                <h3 class="mt-2" id="totalOrders">0</h3>
+                <p class="text-muted mb-0">Commandes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-clock-history text-warning fs-1"></i>
+                <h3 class="mt-2" id="pendingOrders">0</h3>
+                <p class="text-muted mb-0">En cours</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-currency-dollar text-info fs-1"></i>
+                <h3 class="mt-2" id="totalSpent">$0</h3>
+                <p class="text-muted mb-0">Dépensé</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Commandes Récentes -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-list-ul"></i> Mes Commandes Récentes</h5>
+        <a href="#" id="viewAllOrdersLink">Voir tout</a>
+    </div>
+    <div class="card-body">
+        <div id="buyerOrdersList">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Produits Récents -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-shop"></i> Explorer les Produits</h5>
+        <a href="{% url 'product_list' %}">Voir tout</a>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            {% for product in recent_products %}
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="card product-card h-100"> 
+                    <a href="{% url 'product_detail' product.id %}">
+                        {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image text-muted fs-1"></i>
+                        </div>
+                        {% endif %}
+                    </a> 
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title">{{ product.title }}</h6>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="text-primary">${{ product.price_fiat }}</strong>
+                                    <br>
+                                    <small class="text-warning">{{ product.price_pi }} π</small>
+                                </div>
+                                {% if product.in_stock %}
+                                <span class="badge bg-success">En stock</span>
+                                {% else %}
+                                <span class="badge bg-danger">Épuisé</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle"></i> Aucun produit disponible pour le moment.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const token = localStorage.getItem('access_token');
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    if (!token) {
+        window.location.href = "{% url 'login' %}?next={{ request.path|urlencode }}";
+        return;
+    }
+
+    async function loadBuyerOrders() {
+        const ordersListContainer = document.getElementById('buyerOrdersList');
+        try {
+            // Charger seulement les 3 commandes les plus récentes pour l'aperçu
+            const response = await fetch('/api/shops/buyer/orders/?limit=3', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Échec du chargement des commandes');
+            }
+
+            const orders = await response.json();
+            const ordersData = orders.results || orders;
+
+            if (ordersData.length === 0) {
+                ordersListContainer.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="bi bi-cart-x fs-1 text-muted"></i>
+                        <h5 class="mt-3">Vous n'avez pas encore de commande</h5>
+                        <p class="text-muted">Commencez à explorer les produits pour effectuer votre premier achat.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Pour la simplicité, nous n'affichons que le nombre de commandes ici.
+            // La logique d'affichage complète peut être dans une page dédiée "Mes Commandes".
+            document.getElementById('totalOrders').textContent = orders.count || ordersData.length;
+            
+            const pending = ordersData.filter(o => ['pending_payment', 'paid_in_escrow', 'shipped'].includes(o.status)).length;
+            document.getElementById('pendingOrders').textContent = pending;
+
+            const totalSpent = ordersData.reduce((sum, o) => sum + parseFloat(o.total_fiat || 0), 0);
+            document.getElementById('totalSpent').textContent = '$' + totalSpent.toFixed(2);
+
+            ordersListContainer.innerHTML = `<p>${orders.count || ordersData.length} commande(s) trouvée(s). Cliquez sur "Voir tout" pour les détails.</p>`;
+
+        } catch (error) {
+            console.error('Error loading buyer orders:', error);
+            ordersListContainer.innerHTML = `
+                <div class="alert alert-danger">
+                    Erreur lors du chargement de vos commandes. Veuillez réessayer plus tard.
+                </div>
+            `;
+        }
+    }
+
+    loadBuyerOrders();
+});
+</script>
+{% endblock %}
+```
+
+Avec cette nouvelle page, l'expérience sera beaucoup plus claire :
+-   Si vous n'avez pas de commandes, un message vous l'indiquera.
+-   Si vous avez des commandes, elles s'afficheront sous forme de liste, vous permettant de suivre leur statut.
+
+Pour voir quelque chose sur cette page, il vous suffit de passer une première commande !
+
+<!--
+[PROMPT_SUGGESTION]Comment puis-je implémenter la page de détail d'une commande ?[/PROMPT_SUGGESTION]
+[PROMPT_SUGGESTION]Peux-tu m'aider à créer la page de profil utilisateur ?[/PROMPT_SUGGESTION]
+-->

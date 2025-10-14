@@ -1,0 +1,150 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Connexion - Pi Market{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="text-center mb-4">
+            <h2 class="mt-3">Accédez à votre compte</h2>
+            <p class="text-muted">Connectez-vous avec Pi ou votre numéro de téléphone.</p>
+        </div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+                
+                <!-- Option 1: Connexion avec Pi -->
+                <div class="d-grid gap-2">
+                    <button class="btn btn-pi btn-lg" id="pi-login-btn">
+                        <i class="bi bi-unlock"></i> Se connecter avec Pi
+                    </button>
+                </div>
+
+                <div class="text-center my-3 text-muted">OU</div>
+
+                <!-- Option 2: Connexion par téléphone -->
+                <form id="phoneLoginForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="phone_number" class="form-label">
+                            <i class="bi bi-phone"></i> Numéro de Téléphone
+                        </label>
+                        <input type="tel" class="form-control form-control-lg" id="phone_number" 
+                               placeholder="+221XXXXXXXXX" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-outline-primary btn-lg" id="phoneLoginBtn">
+                            <i class="bi bi-box-arrow-in-right"></i> Continuer avec le téléphone
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted">Pas encore de compte ? 
+                        <a href="{% url 'register' %}" class="text-decoration-none fw-bold">Inscrivez-vous</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// --- Connexion avec le SDK Pi ---
+document.getElementById('pi-login-btn').addEventListener('click', async function() {
+    const loginBtn = this;
+    loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Authentification...';
+    loginBtn.disabled = true;
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.classList.add('d-none');
+
+    try {
+        const scopes = ['username', 'payments'];
+        const authResult = await Pi.authenticate(scopes, onIncompletePaymentFound);
+        
+        // Envoyer le résultat d'authentification à votre backend
+        const response = await fetch('/api/accounts/pi-auth/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(authResult)
+        });
+
+        const data = await response.json();
+        errorDiv.classList.add('d-none');
+
+        if (response.ok) {
+            // Sauvegarder les tokens et les informations utilisateur
+            localStorage.setItem('access_token', data.access);
+            localStorage.setItem('refresh_token', data.refresh);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            
+            // Rediriger vers le tableau de bord unifié
+            window.location.href = "{% url 'account_dashboard' %}";
+        } else {
+            errorDiv.textContent = data.error || 'Une erreur est survenue lors de la connexion.';
+            errorDiv.classList.remove('d-none');
+        }
+    } catch (error) {
+        // L'utilisateur a annulé ou une erreur s'est produite
+        errorDiv.textContent = error.message || "L'authentification a été annulée ou a échoué.";
+        errorDiv.classList.remove('d-none');
+    } finally {
+        loginBtn.innerHTML = '<i class="bi bi-unlock"></i> Se connecter avec Pi';
+        loginBtn.disabled = false;
+    }
+});
+
+// --- Connexion avec le numéro de téléphone ---
+document.getElementById('phoneLoginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const loginBtn = document.getElementById('phoneLoginBtn');
+    loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Connexion...';
+    loginBtn.disabled = true;
+
+    const phoneNumber = document.getElementById('phone_number').value;
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.classList.add('d-none');
+
+    try {
+        const response = await fetch('/api/accounts/login/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                phone_number: phoneNumber
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Sauvegarder les tokens et les informations utilisateur
+            localStorage.setItem('access_token', result.access);
+            localStorage.setItem('refresh_token', result.refresh);
+            localStorage.setItem('user', JSON.stringify(result.user));
+            
+            // Rediriger vers le tableau de bord
+            window.location.href = "{% url 'account_dashboard' %}";
+        } else {
+            errorDiv.textContent = result.error || 'Une erreur est survenue.';
+            errorDiv.classList.remove('d-none');
+        }
+    } catch (error) {
+        errorDiv.textContent = 'Erreur de connexion: ' + error.message;
+        errorDiv.classList.remove('d-none');
+    } finally {
+        loginBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Continuer avec le téléphone';
+        loginBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

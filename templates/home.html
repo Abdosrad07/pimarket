@@ -1,0 +1,125 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}Accueil - Pi Market{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="text-center mb-5">
+    <h1 class="display-4 fw-bold mb-3">
+        
+        Bienvenue sur Pi Market
+    </h1>
+    <p class="lead text-muted">
+        Achetez et vendez en toute sécurité avec la crypto Pi
+    </p>
+    <div class="mt-4">
+        <a href="{% url 'product_list' %}" class="btn btn-pi btn-lg me-2">
+            <i class="bi bi-shop"></i> Explorer les Produits
+        </a>
+        {% if not user.is_authenticated %}
+        <a href="/auth/register/" class="btn btn-pi-outline btn-lg">
+            <i class="bi bi-person-plus"></i> Créer un Compte
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-shop text-primary fs-1"></i>
+                <h3 class="mt-3">{{ stats.shops_count }}</h3>
+                <p class="text-muted">Boutiques</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-box-seam text-success fs-1"></i>
+                <h3 class="mt-3">{{ stats.products_count }}</h3>
+                <p class="text-muted">Produits</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-people text-info fs-1"></i>
+                <h3 class="mt-3">{{ stats.users_count }}</h3>
+                <p class="text-muted">Utilisateurs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-cart-check text-warning fs-1"></i>
+                <h3 class="mt-3">{{ stats.orders_count }}</h3>
+                <p class="text-muted">Commandes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Produits en Vedette -->
+<h2 class="mb-4"><i class="bi bi-star-fill text-warning"></i> Produits en Vedette</h2>
+<div class="row g-4">
+    {% for product in featured_products %}
+    <div class="col-md-4 col-sm-6">
+        <div class="card product-card h-100"> 
+            {% if product.image and product.image.url %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 250px; object-fit: cover;">
+            {% else %}
+            <img src="/static/images/placeholder.png" class="card-img-top" alt="Image non disponible" style="height: 250px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ product.title }}</h5>
+                <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong class="text-primary">${{ product.price_fiat }}</strong>
+                        <br>
+
+                        <small class="text-muted"><i class="bi bi-currency-bitcoin"></i> {{ product.price_pi }} π</small>
+                    </div>
+                    {% if product.in_stock %}
+                    <span class="badge bg-success">En stock</span>
+                    {% else %}
+                    <span class="badge bg-danger">Rupture</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-footer bg-white border-0">
+                <a href="{% url 'product_detail' product.id %}" class="btn btn-pi w-100">
+                    <i class="bi bi-eye"></i> Voir Détails
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Aucun produit en vedette pour le moment.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- CTA Section -->
+<div class="text-center mt-5 p-5 bg-light rounded">
+    <h3 class="mb-3">Prêt à Vendre sur Pi Market ?</h3>
+    <p class="text-muted">Créez votre boutique et commencez à vendre en quelques minutes</p>
+    {% if user.is_authenticated %}
+    <a href="/shops/create/" class="btn btn-pi btn-lg">
+        <i class="bi bi-shop-window"></i> Créer Ma Boutique
+    </a>
+    {% else %}
+    <a href="/auth/register/" class="btn btn-pi btn-lg">
+        <i class="bi bi-person-plus"></i> S'inscrire Maintenant
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
