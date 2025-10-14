@@ -14,6 +14,7 @@
         <div class="card">
             <div class="card-body p-4">
                 <form id="registerForm">
+                    {% csrf_token %}
                     <div class="mb-3">
                         <label for="phone_number" class="form-label">
                             <i class="bi bi-phone"></i> Numéro de Téléphone
@@ -110,6 +111,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token
             },
             body: JSON.stringify(data)
         });
@@ -139,7 +141,7 @@ document.getElementById('registerForm').addEventListener('submit', async functio
             
             // Rediriger vers le tableau de bord unifié
             window.location.href = "{% url 'account_dashboard' %}";
-        } else {
+        }  else {
             alert('Erreur: ' + (result.error || JSON.stringify(result)));
             submitBtn.innerHTML = '<i class="bi bi-arrow-right-circle"></i> Continuer';
             submitBtn.disabled = false;
@@ -150,5 +152,22 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         submitBtn.disabled = false;
     }
 });
+
+// Function to get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 {% endblock %}
