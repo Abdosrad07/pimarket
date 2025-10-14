@@ -3,6 +3,7 @@ Stripe Payment Provider
 
 Handles Stripe payment integration with escrow logic simulation.
 
+
 TODO for Production:
 - Replace test keys with live keys in .env
 - Implement proper Stripe Connect for seller payouts
