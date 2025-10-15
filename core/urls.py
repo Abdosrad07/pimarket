@@ -1,6 +1,9 @@
 from django.urls import path
+from django.conf import settings
+from django.views.static import serve
 from .views import serve_text_file
+import os   
 
 urlpatterns = [
-    path('validation-key', serve_text_file, name='validation_key'),
+    path('validation-key', serve, {'path': 'validation-key.txt', 'document_root': os.path.join(settings.BASE_DIR),}),
 ]

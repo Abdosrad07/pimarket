@@ -1,5 +1,6 @@
 from django.http import HttpResponse, Http404
 from django.conf import settings
+
 import os
 
 def serve_text_file(request):
