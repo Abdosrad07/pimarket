@@ -5,5 +5,5 @@ from .views import serve_text_file
 import os   
 
 urlpatterns = [
-    path('validation-key', serve, {'path': 'validation-key.txt', 'document_root': os.path.join(settings.BASE_DIR),}),
+    path('validation-key.txt', serve, {'path': 'validation-key.txt', 'document_root': os.path.join(settings.BASE_DIR),}),
 ]
