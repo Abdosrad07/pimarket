@@ -633,7 +633,7 @@ async function setupEditProductModal() {
         btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Mise à jour...`;
 
         try {
-            const response = await fetch(`/api/shops/products/${productId}/update/`, {
+            const response = await fetch(`/api/shops/products/${productId}/`, {
                 method: 'PUT', // ou PATCH si vous ne mettez à jour que certains champs
                 headers: { 'Authorization': 'Bearer ' + token },
                 body: formData
@@ -670,7 +670,7 @@ function setupProductActionListeners() {
         if (target.classList.contains('delete-product-btn')) {
             if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ? Cette action est irréversible.')) {
                 try {
-                    const response = await fetch(`/api/shops/products/${productId}/update/`, {
+                    const response = await fetch(`/api/shops/products/${productId}/`, {
                         method: 'DELETE',
                         headers: { 'Authorization': 'Bearer ' + token }
                     });
