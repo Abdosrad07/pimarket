@@ -106,7 +106,7 @@ class ShopProductListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         shop_id = self.kwargs['shop_id']
         shop = get_object_or_404(Shop, id=shop_id, owner=self.request.user)
-        serializer.save(shop=shop)
+        serializer.save(shop=shop, is_active=True)
 
 
 class ProductUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):

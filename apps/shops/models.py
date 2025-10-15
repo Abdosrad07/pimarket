@@ -47,7 +47,7 @@ class Product(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     price_fiat = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
-    price_pi = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
+    price_pi = models.DecimalField(max_digits=10, decimal_places=7, validators=[MinValueValidator(Decimal('0.01'))])
     is_digital = models.BooleanField(default=False)
     digital_file_url = models.URLField(blank=True, help_text="URL for digital product download")
     stock = models.IntegerField(default=0, validators=[MinValueValidator(0)])

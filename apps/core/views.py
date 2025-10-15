@@ -98,11 +98,8 @@ def shop_detail(request, pk):
     }
     return render(request, 'shops/shop_detail.html', context)
 
-@login_required
 def create_shop(request):
     """Page pour créer une nouvelle boutique."""
-    if request.method == 'POST':
-        # La logique est gérée par l'API via JavaScript, mais on garde la vue pour le rendu du template
-        # et comme fallback potentiel.
-        return redirect('create_shop') # Redirige pour éviter les soumissions multiples
+    # La logique de création et d'authentification est gérée par l'API via JavaScript.
+    # La vue sert uniquement à rendre le template.
     return render(request, 'shops/create_shop.html')
