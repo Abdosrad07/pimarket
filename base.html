@@ -1,0 +1,441 @@
+﻿﻿{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#7b3ff2">
+    <meta name="description" content="Pi Market - Marketplace pour acheter et vendre avec Pi Network">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pi Market">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/images/icon-192x192.png">
+    <title>{% block title %}Pi Market - Marketplace Pi Network{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --pi-purple: #7b3ff2;
+            --pi-gold: #ffd700;
+            --pi-dark: #1a1a2e;
+            --pi-light: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--pi-purple) !important;
+            font-size: 1.5rem;
+        }
+        
+        .pi-icon {
+            color: var(--pi-gold);
+            font-size: 1.8rem;
+            margin-right: 10px;
+        }
+        
+        .content-wrapper {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 1200px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .btn-pi {
+            background: linear-gradient(135deg, var(--pi-purple) 0%, #9b59b6 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pi:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(123, 63, 242, 0.4);
+            color: white;
+        }
+        
+        .btn-pi-outline {
+            background: transparent;
+            color: var(--pi-purple);
+            border: 2px solid var(--pi-purple);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-pi-outline:hover {
+            background: var(--pi-purple);
+            color: white;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .product-card img {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .badge-pi {
+            background: linear-gradient(135deg, var(--pi-purple) 0%, #9b59b6 100%);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px 0;
+            margin-top: 50px;
+            border-top: 3px solid var(--pi-purple);
+        }
+        
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+        
+        @media (max-width: 768px) {
+            .content-wrapper {
+                margin: 15px;
+                padding: 20px;
+            }
+            
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Dark Mode */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .navbar {
+            background: rgba(26, 26, 46, 0.95) !important;
+        }
+        
+        body.dark-mode .content-wrapper {
+            background: #1e1e30;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .card {
+            background: #2a2a40;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .card-header {
+            background: #353550 !important;
+            color: #e0e0e0;
+            border-bottom: 1px solid #444;
+        }
+        
+        body.dark-mode .navbar-brand,
+        body.dark-mode .nav-link {
+            color: #e0e0e0 !important;
+        }
+        
+        body.dark-mode .text-muted {
+            color: #aaa !important;
+        }
+        
+        body.dark-mode .bg-light {
+            background-color: #2a2a40 !important;
+        }
+        
+        body.dark-mode .footer {
+            background: rgba(26, 26, 46, 0.95) !important;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .form-control,
+        body.dark-mode .form-select {
+            background-color: #2a2a40;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        
+        body.dark-mode .dropdown-menu {
+            background-color: #2a2a40;
+        }
+        
+        body.dark-mode .dropdown-item {
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .dropdown-item:hover {
+            background-color: #353550;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}">
+                <img src="{% static 'images/logo.png' %}" alt="Pi Market Logo" style="height: 40px; margin-right: 10px;">
+                
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'product_list' %}"><i class="bi bi-shop"></i> Produits</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="{% url 'cart' %}">
+                            <i class="bi bi-cart3"></i> Panier
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-count">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn btn-link" id="darkModeToggle">
+                            <i class="bi bi-moon-fill" id="darkModeIcon"></i>
+                        </button>
+                    </li>
+                    <!-- Menu Utilisateur Connecté (caché par défaut) -->
+                    <li class="nav-item dropdown d-none" id="user-menu">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i> <span id="nav-username"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" id="user-menu-list">
+                            <li><a class="dropdown-item" href="{% url 'account_dashboard' %}"><i class="bi bi-person-badge"></i> Mon Compte</a></li>
+                            <li><a class="dropdown-item" href="#" id="logout-btn"><i class="bi bi-box-arrow-right"></i> Déconnexion</a></li>
+                        </ul>
+                    </li>
+                    <!-- Menu Visiteur (caché par défaut) -->
+                    <li class="nav-item d-none" id="guest-nav-login">
+                            <a class="nav-link" href="{% url 'login' %}"><i class="bi bi-box-arrow-in-right"></i> Connexion</a>
+                        </li>
+                    <li class="nav-item d-none" id="guest-nav-register">
+                            <a href="{% url 'register' %}" class="btn btn-pi ms-2">Inscription</a>
+                        </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages Flash -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Contenu Principal -->
+    <div class="container">
+        <div class="content-wrapper">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5 class="d-flex align-items-center">
+                        <img src="{% static 'images/logo.png' %}" alt="Pi Market" style="height: 30px; margin-right: 10px;">
+                        
+                    </h5>
+                    <p class="mt-2">La marketplace révolutionnaire sur Pi Network</p>
+                </div>
+                <div class="col-md-4">
+                    <h6>Liens Rapides</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}" class="text-decoration-none">Accueil</a></li>
+                        <li><a href="{% url 'product_list' %}" class="text-decoration-none">Produits</a></li>
+                        <li><a href="{% url 'swagger-ui' %}" class="text-decoration-none">API Documentation</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Suivez-nous</h6>
+                    <a href="#" class="text-decoration-none me-3"><i class="bi bi-twitter fs-4"></i></a>
+                    <a href="#" class="text-decoration-none me-3"><i class="bi bi-facebook fs-4"></i></a>
+                    <a href="#" class="text-decoration-none"><i class="bi bi-instagram fs-4"></i></a>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p class="mb-0">&copy; 2025 Pi Market. Projet Hackathon Pi Network.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Pi SDK -->
+    <script src="https://sdk.pi-system.com/v2/pi-sdk.js"></script>
+    <script>Pi.init({ version: "2.0", sandbox: true })</script>
+
+    <!-- Notifications -->
+    <script src="/static/js/notifications.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gérer l'état de connexion de l'utilisateur
+            const userMenu = document.getElementById('user-menu');
+            const guestLogin = document.getElementById('guest-nav-login');
+            const guestRegister = document.getElementById('guest-nav-register');
+            const navUsername = document.getElementById('nav-username');
+            const logoutBtn = document.getElementById('logout-btn');
+
+            const accessToken = localStorage.getItem('access_token');
+            const user = JSON.parse(localStorage.getItem('user'));
+
+            if (accessToken && user) {
+                // Utilisateur connecté
+                navUsername.textContent = user.display_name;
+                userMenu.classList.remove('d-none');
+            } else {
+                // Visiteur
+                guestLogin.classList.remove('d-none');
+                guestRegister.classList.remove('d-none');
+            }
+
+            // Gérer la déconnexion
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    localStorage.removeItem('user'); 
+                    window.location.href = "{% url 'home' %}";
+                });
+            }
+        });
+
+        // Dark Mode
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const isDarkMode = localStorage.getItem('darkMode') === 'true';
+        
+        if (isDarkMode) {
+            document.body.classList.add('dark-mode');
+            darkModeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+        }
+        
+        darkModeToggle.addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const isNowDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isNowDark);
+            
+            if (isNowDark) {
+                darkModeIcon.classList.replace('bi-moon-fill', 'bi-sun-fill');
+            } else {
+                darkModeIcon.classList.replace('bi-sun-fill', 'bi-moon-fill');
+            }
+        });
+        
+        // Gérer le panier (LocalStorage)
+        function updateCartCount() {
+            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-count');
+            if (badge) {
+                badge.textContent = count;
+            }
+        }
+        
+        // Mettre à jour au chargement
+        document.addEventListener('DOMContentLoaded', updateCartCount);
+        
+        // PWA Installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Afficher un bouton d'installation personnalisé
+            const installBanner = document.createElement('div');
+            installBanner.className = 'alert alert-info alert-dismissible fade show position-fixed bottom-0 start-50 translate-middle-x mb-3';
+            installBanner.style.zIndex = '9999';
+            installBanner.style.maxWidth = '500px';
+            installBanner.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <h6><i class="bi bi-phone"></i> Installer Pi Market</h6>
+                <p class="mb-2">Installez l'application pour une meilleure expérience !</p>
+                <button class="btn btn-sm btn-pi" id="installBtn">
+                    <i class="bi bi-download"></i> Installer
+                </button>
+            `;
+            document.body.appendChild(installBanner);
+            
+            document.getElementById('installBtn').addEventListener('click', async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`Installation: ${outcome}`);
+                deferredPrompt = null;
+                installBanner.remove();
+            });
+        });
+        
+        // Enregistrer le Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/js/sw.js')
+                .then(registration => {
+                    console.log('Service Worker enregistré:', registration);
+                })
+                .catch(error => {
+                    console.log('Erreur Service Worker:', error);
+                });
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
