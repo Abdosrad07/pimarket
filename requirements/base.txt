@@ -35,6 +35,9 @@ stripe==7.4.0
 # File Handling
 Pillow==10.1.0
 
+# Cloud Storage (for media files) - Alternative to S3
+django-cloudinary-storage==0.3.0
+
 # Phone & SMS
 phonenumbers==8.13.25
 twilio==8.10.0

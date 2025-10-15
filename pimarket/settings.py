@@ -30,6 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
+    # Cloudinary
+    'cloudinary',
+    'cloudinary_storage',
+    
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
@@ -130,6 +134,23 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Whitenoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
+# Production Settings
+if not DEBUG:
+    # Security Settings
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    USE_X_FORWARDED_HOST = True
+
+    # Cloudinary for Media Files
+    CLOUDINARY_URL = env('CLOUDINARY_URL')
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS
@@ -218,16 +239,3 @@ TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
 # Escrow Settings
 AUTO_RELEASE_DAYS = env.int('AUTO_RELEASE_DAYS', default=7)
 DISPUTE_WINDOW_DAYS = env.int('DISPUTE_WINDOW_DAYS', default=3)
-
-# Security Settings (Production)
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
-
-    # Trust the 'X-Forwarded-Proto' and 'X-Forwarded-Host' headers from the proxy
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    USE_X_FORWARDED_HOST = True

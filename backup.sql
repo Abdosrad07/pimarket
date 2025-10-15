@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict StBKcksXTuGmxcK5cxMbeyakdlLChAPOc98P2cjCI9jX7VYEBPYUhgIyISm4P3w
+\restrict Lxa9a6WaKRWc7eU2AsofOar6IYgdHtc8jNE88XahP3Ab8K4t5M749aR2pppKqkC
 
 -- Dumped from database version 15.14
 -- Dumped by pg_dump version 15.14
@@ -18,12 +18,159 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public.shops_shop DROP CONSTRAINT IF EXISTS shops_shop_owner_id_9a9c8ee7_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.shops_product DROP CONSTRAINT IF EXISTS shops_product_shop_id_b4feef5b_fk_shops_shop_id;
+ALTER TABLE IF EXISTS ONLY public.shops_product DROP CONSTRAINT IF EXISTS shops_product_category_id_75a38fc1_fk_shops_productcategory_id;
+ALTER TABLE IF EXISTS ONLY public.shops_orderitem DROP CONSTRAINT IF EXISTS shops_orderitem_product_id_285e7118_fk_shops_product_id;
+ALTER TABLE IF EXISTS ONLY public.shops_orderitem DROP CONSTRAINT IF EXISTS shops_orderitem_order_id_d23fdad5_fk_shops_order_id;
+ALTER TABLE IF EXISTS ONLY public.shops_order DROP CONSTRAINT IF EXISTS shops_order_shop_id_fcf59d7f_fk_shops_shop_id;
+ALTER TABLE IF EXISTS ONLY public.shops_order DROP CONSTRAINT IF EXISTS shops_order_buyer_id_84e935ea_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.shops_disputemessage DROP CONSTRAINT IF EXISTS shops_disputemessage_sender_id_a586acbe_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.shops_disputemessage DROP CONSTRAINT IF EXISTS shops_disputemessage_dispute_id_b7724219_fk_shops_dispute_id;
+ALTER TABLE IF EXISTS ONLY public.shops_dispute DROP CONSTRAINT IF EXISTS shops_dispute_raised_by_id_926412e4_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.shops_dispute DROP CONSTRAINT IF EXISTS shops_dispute_order_id_b3eb1a01_fk_shops_order_id;
+ALTER TABLE IF EXISTS ONLY public.shops_delivery DROP CONSTRAINT IF EXISTS shops_delivery_order_id_4881eb45_fk_shops_order_id;
+ALTER TABLE IF EXISTS ONLY public.payments_payment DROP CONSTRAINT IF EXISTS payments_payment_order_id_22c479b7_fk_shops_order_id;
+ALTER TABLE IF EXISTS ONLY public.payments_escrowtransaction DROP CONSTRAINT IF EXISTS payments_escrowtrans_payment_id_4ade8c79_fk_payments_;
+ALTER TABLE IF EXISTS ONLY public.messaging_messagereadstatus DROP CONSTRAINT IF EXISTS messaging_messagerea_user_id_ebfdbf21_fk_accounts_;
+ALTER TABLE IF EXISTS ONLY public.messaging_messagereadstatus DROP CONSTRAINT IF EXISTS messaging_messagerea_message_id_f4192ee4_fk_messaging;
+ALTER TABLE IF EXISTS ONLY public.messaging_message DROP CONSTRAINT IF EXISTS messaging_message_sender_id_7a7088e6_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.messaging_message DROP CONSTRAINT IF EXISTS messaging_message_conversation_id_3db4d3d1_fk_messaging;
+ALTER TABLE IF EXISTS ONLY public.messaging_conversation DROP CONSTRAINT IF EXISTS messaging_conversation_product_id_c316d570_fk_shops_product_id;
+ALTER TABLE IF EXISTS ONLY public.messaging_conversation_participants DROP CONSTRAINT IF EXISTS messaging_conversati_user_id_d4f41769_fk_accounts_;
+ALTER TABLE IF EXISTS ONLY public.messaging_conversation_participants DROP CONSTRAINT IF EXISTS messaging_conversati_conversation_id_890e9e37_fk_messaging;
+ALTER TABLE IF EXISTS ONLY public.django_admin_log DROP CONSTRAINT IF EXISTS django_admin_log_user_id_c564eba6_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.django_admin_log DROP CONSTRAINT IF EXISTS django_admin_log_content_type_id_c4bce8eb_fk_django_co;
+ALTER TABLE IF EXISTS ONLY public.auth_permission DROP CONSTRAINT IF EXISTS auth_permission_content_type_id_2f476e4b_fk_django_co;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissions_group_id_b120cbf9_fk_auth_group_id;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissio_permission_id_84c5c92e_fk_auth_perm;
+ALTER TABLE IF EXISTS ONLY public.accounts_userlocation DROP CONSTRAINT IF EXISTS accounts_userlocation_user_id_66f94a3f_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_user_permissions DROP CONSTRAINT IF EXISTS accounts_user_user_p_user_id_e4f0a161_fk_accounts_;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_user_permissions DROP CONSTRAINT IF EXISTS accounts_user_user_p_permission_id_113bb443_fk_auth_perm;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_groups DROP CONSTRAINT IF EXISTS accounts_user_groups_user_id_52b62117_fk_accounts_user_id;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_groups DROP CONSTRAINT IF EXISTS accounts_user_groups_group_id_bd11a704_fk_auth_group_id;
+DROP INDEX IF EXISTS public.shops_shop_owner_id_9a9c8ee7;
+DROP INDEX IF EXISTS public.shops_productcategory_slug_a503f48e_like;
+DROP INDEX IF EXISTS public.shops_productcategory_name_38e48f60_like;
+DROP INDEX IF EXISTS public.shops_product_shop_id_b4feef5b;
+DROP INDEX IF EXISTS public.shops_product_category_id_75a38fc1;
+DROP INDEX IF EXISTS public.shops_produ_shop_id_e79730_idx;
+DROP INDEX IF EXISTS public.shops_produ_categor_0a9b03_idx;
+DROP INDEX IF EXISTS public.shops_orderitem_product_id_285e7118;
+DROP INDEX IF EXISTS public.shops_orderitem_order_id_d23fdad5;
+DROP INDEX IF EXISTS public.shops_order_status_adc74cd1_like;
+DROP INDEX IF EXISTS public.shops_order_status_adc74cd1;
+DROP INDEX IF EXISTS public.shops_order_shop_id_fcf59d7f;
+DROP INDEX IF EXISTS public.shops_order_shop_id_499f73_idx;
+DROP INDEX IF EXISTS public.shops_order_order_number_a2d3923e_like;
+DROP INDEX IF EXISTS public.shops_order_buyer_id_84e935ea;
+DROP INDEX IF EXISTS public.shops_order_buyer_i_70438f_idx;
+DROP INDEX IF EXISTS public.shops_disputemessage_sender_id_a586acbe;
+DROP INDEX IF EXISTS public.shops_disputemessage_dispute_id_b7724219;
+DROP INDEX IF EXISTS public.shops_dispute_raised_by_id_926412e4;
+DROP INDEX IF EXISTS public.payments_payment_status_fc8cbda2_like;
+DROP INDEX IF EXISTS public.payments_payment_status_fc8cbda2;
+DROP INDEX IF EXISTS public.payments_payment_provider_payment_id_6e8e6ad7_like;
+DROP INDEX IF EXISTS public.payments_payment_provider_payment_id_6e8e6ad7;
+DROP INDEX IF EXISTS public.payments_payment_order_id_22c479b7;
+DROP INDEX IF EXISTS public.payments_pa_provide_3e1786_idx;
+DROP INDEX IF EXISTS public.payments_pa_order_i_a76289_idx;
+DROP INDEX IF EXISTS public.messaging_messagereadstatus_user_id_ebfdbf21;
+DROP INDEX IF EXISTS public.messaging_messagereadstatus_message_id_f4192ee4;
+DROP INDEX IF EXISTS public.messaging_message_sender_id_7a7088e6;
+DROP INDEX IF EXISTS public.messaging_message_conversation_id_3db4d3d1;
+DROP INDEX IF EXISTS public.messaging_conversation_product_id_c316d570;
+DROP INDEX IF EXISTS public.messaging_conversation_participants_user_id_d4f41769;
+DROP INDEX IF EXISTS public.messaging_conversation_participants_conversation_id_890e9e37;
+DROP INDEX IF EXISTS public.django_session_session_key_c0390e0f_like;
+DROP INDEX IF EXISTS public.django_session_expire_date_a5c62663;
+DROP INDEX IF EXISTS public.django_admin_log_user_id_c564eba6;
+DROP INDEX IF EXISTS public.django_admin_log_content_type_id_c4bce8eb;
+DROP INDEX IF EXISTS public.auth_permission_content_type_id_2f476e4b;
+DROP INDEX IF EXISTS public.auth_group_permissions_permission_id_84c5c92e;
+DROP INDEX IF EXISTS public.auth_group_permissions_group_id_b120cbf9;
+DROP INDEX IF EXISTS public.auth_group_name_a6ea08ec_like;
+DROP INDEX IF EXISTS public.accounts_userlocation_user_id_66f94a3f;
+DROP INDEX IF EXISTS public.accounts_user_user_permissions_user_id_e4f0a161;
+DROP INDEX IF EXISTS public.accounts_user_user_permissions_permission_id_113bb443;
+DROP INDEX IF EXISTS public.accounts_user_phone_number_af3e1068_like;
+DROP INDEX IF EXISTS public.accounts_user_groups_user_id_52b62117;
+DROP INDEX IF EXISTS public.accounts_user_groups_group_id_bd11a704;
+DROP INDEX IF EXISTS public.accounts_phoneotp_phone_number_5521de31_like;
+DROP INDEX IF EXISTS public.accounts_phoneotp_phone_number_5521de31;
+ALTER TABLE IF EXISTS ONLY public.shops_shop DROP CONSTRAINT IF EXISTS shops_shop_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_productcategory DROP CONSTRAINT IF EXISTS shops_productcategory_slug_key;
+ALTER TABLE IF EXISTS ONLY public.shops_productcategory DROP CONSTRAINT IF EXISTS shops_productcategory_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_productcategory DROP CONSTRAINT IF EXISTS shops_productcategory_name_key;
+ALTER TABLE IF EXISTS ONLY public.shops_product DROP CONSTRAINT IF EXISTS shops_product_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_orderitem DROP CONSTRAINT IF EXISTS shops_orderitem_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_order DROP CONSTRAINT IF EXISTS shops_order_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_order DROP CONSTRAINT IF EXISTS shops_order_order_number_key;
+ALTER TABLE IF EXISTS ONLY public.shops_disputemessage DROP CONSTRAINT IF EXISTS shops_disputemessage_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_dispute DROP CONSTRAINT IF EXISTS shops_dispute_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_dispute DROP CONSTRAINT IF EXISTS shops_dispute_order_id_key;
+ALTER TABLE IF EXISTS ONLY public.shops_delivery DROP CONSTRAINT IF EXISTS shops_delivery_pkey;
+ALTER TABLE IF EXISTS ONLY public.shops_delivery DROP CONSTRAINT IF EXISTS shops_delivery_order_id_key;
+ALTER TABLE IF EXISTS ONLY public.payments_payment DROP CONSTRAINT IF EXISTS payments_payment_pkey;
+ALTER TABLE IF EXISTS ONLY public.payments_escrowtransaction DROP CONSTRAINT IF EXISTS payments_escrowtransaction_pkey;
+ALTER TABLE IF EXISTS ONLY public.payments_escrowtransaction DROP CONSTRAINT IF EXISTS payments_escrowtransaction_payment_id_key;
+ALTER TABLE IF EXISTS ONLY public.messaging_messagereadstatus DROP CONSTRAINT IF EXISTS messaging_messagereadstatus_pkey;
+ALTER TABLE IF EXISTS ONLY public.messaging_messagereadstatus DROP CONSTRAINT IF EXISTS messaging_messagereadstatus_message_id_user_id_6a5e3966_uniq;
+ALTER TABLE IF EXISTS ONLY public.messaging_message DROP CONSTRAINT IF EXISTS messaging_message_pkey;
+ALTER TABLE IF EXISTS ONLY public.messaging_conversation DROP CONSTRAINT IF EXISTS messaging_conversation_pkey;
+ALTER TABLE IF EXISTS ONLY public.messaging_conversation_participants DROP CONSTRAINT IF EXISTS messaging_conversation_participants_pkey;
+ALTER TABLE IF EXISTS ONLY public.messaging_conversation_participants DROP CONSTRAINT IF EXISTS messaging_conversation_p_conversation_id_user_id_74726b68_uniq;
+ALTER TABLE IF EXISTS ONLY public.django_session DROP CONSTRAINT IF EXISTS django_session_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_migrations DROP CONSTRAINT IF EXISTS django_migrations_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_content_type DROP CONSTRAINT IF EXISTS django_content_type_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_content_type DROP CONSTRAINT IF EXISTS django_content_type_app_label_model_76bd3d3b_uniq;
+ALTER TABLE IF EXISTS ONLY public.django_admin_log DROP CONSTRAINT IF EXISTS django_admin_log_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_permission DROP CONSTRAINT IF EXISTS auth_permission_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_permission DROP CONSTRAINT IF EXISTS auth_permission_content_type_id_codename_01ab375a_uniq;
+ALTER TABLE IF EXISTS ONLY public.auth_group DROP CONSTRAINT IF EXISTS auth_group_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissions_group_id_permission_id_0cd325b0_uniq;
+ALTER TABLE IF EXISTS ONLY public.auth_group DROP CONSTRAINT IF EXISTS auth_group_name_key;
+ALTER TABLE IF EXISTS ONLY public.accounts_userlocation DROP CONSTRAINT IF EXISTS accounts_userlocation_pkey;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_user_permissions DROP CONSTRAINT IF EXISTS accounts_user_user_permissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_user_permissions DROP CONSTRAINT IF EXISTS accounts_user_user_permi_user_id_permission_id_2ab516c2_uniq;
+ALTER TABLE IF EXISTS ONLY public.accounts_user DROP CONSTRAINT IF EXISTS accounts_user_pkey;
+ALTER TABLE IF EXISTS ONLY public.accounts_user DROP CONSTRAINT IF EXISTS accounts_user_phone_number_key;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_groups DROP CONSTRAINT IF EXISTS accounts_user_groups_user_id_group_id_59c0b32f_uniq;
+ALTER TABLE IF EXISTS ONLY public.accounts_user_groups DROP CONSTRAINT IF EXISTS accounts_user_groups_pkey;
+ALTER TABLE IF EXISTS ONLY public.accounts_phoneotp DROP CONSTRAINT IF EXISTS accounts_phoneotp_pkey;
+DROP TABLE IF EXISTS public.shops_shop;
+DROP TABLE IF EXISTS public.shops_productcategory;
+DROP TABLE IF EXISTS public.shops_product;
+DROP TABLE IF EXISTS public.shops_orderitem;
+DROP TABLE IF EXISTS public.shops_order;
+DROP TABLE IF EXISTS public.shops_disputemessage;
+DROP TABLE IF EXISTS public.shops_dispute;
+DROP TABLE IF EXISTS public.shops_delivery;
+DROP TABLE IF EXISTS public.payments_payment;
+DROP TABLE IF EXISTS public.payments_escrowtransaction;
+DROP TABLE IF EXISTS public.messaging_messagereadstatus;
+DROP TABLE IF EXISTS public.messaging_message;
+DROP TABLE IF EXISTS public.messaging_conversation_participants;
+DROP TABLE IF EXISTS public.messaging_conversation;
+DROP TABLE IF EXISTS public.django_session;
+DROP TABLE IF EXISTS public.django_migrations;
+DROP TABLE IF EXISTS public.django_content_type;
+DROP TABLE IF EXISTS public.django_admin_log;
+DROP TABLE IF EXISTS public.auth_permission;
+DROP TABLE IF EXISTS public.auth_group_permissions;
+DROP TABLE IF EXISTS public.auth_group;
+DROP TABLE IF EXISTS public.accounts_userlocation;
+DROP TABLE IF EXISTS public.accounts_user_user_permissions;
+DROP TABLE IF EXISTS public.accounts_user_groups;
+DROP TABLE IF EXISTS public.accounts_user;
+DROP TABLE IF EXISTS public.accounts_phoneotp;
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: accounts_phoneotp; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: accounts_phoneotp; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.accounts_phoneotp (
@@ -37,10 +184,8 @@ CREATE TABLE public.accounts_phoneotp (
 );
 
 
-ALTER TABLE public.accounts_phoneotp OWNER TO pimarket;
-
 --
--- Name: accounts_phoneotp_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: accounts_phoneotp_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.accounts_phoneotp ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -54,7 +199,7 @@ ALTER TABLE public.accounts_phoneotp ALTER COLUMN id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: accounts_user; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: accounts_user; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.accounts_user (
@@ -76,10 +221,8 @@ CREATE TABLE public.accounts_user (
 );
 
 
-ALTER TABLE public.accounts_user OWNER TO pimarket;
-
 --
--- Name: accounts_user_groups; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.accounts_user_groups (
@@ -89,10 +232,8 @@ CREATE TABLE public.accounts_user_groups (
 );
 
 
-ALTER TABLE public.accounts_user_groups OWNER TO pimarket;
-
 --
--- Name: accounts_user_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.accounts_user_groups ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -106,7 +247,7 @@ ALTER TABLE public.accounts_user_groups ALTER COLUMN id ADD GENERATED BY DEFAULT
 
 
 --
--- Name: accounts_user_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: accounts_user_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.accounts_user ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -120,7 +261,7 @@ ALTER TABLE public.accounts_user ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: accounts_user_user_permissions; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.accounts_user_user_permissions (
@@ -130,10 +271,8 @@ CREATE TABLE public.accounts_user_user_permissions (
 );
 
 
-ALTER TABLE public.accounts_user_user_permissions OWNER TO pimarket;
-
 --
--- Name: accounts_user_user_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.accounts_user_user_permissions ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -147,7 +286,7 @@ ALTER TABLE public.accounts_user_user_permissions ALTER COLUMN id ADD GENERATED 
 
 
 --
--- Name: accounts_userlocation; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: accounts_userlocation; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.accounts_userlocation (
@@ -162,10 +301,8 @@ CREATE TABLE public.accounts_userlocation (
 );
 
 
-ALTER TABLE public.accounts_userlocation OWNER TO pimarket;
-
 --
--- Name: accounts_userlocation_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: accounts_userlocation_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.accounts_userlocation ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -179,7 +316,7 @@ ALTER TABLE public.accounts_userlocation ALTER COLUMN id ADD GENERATED BY DEFAUL
 
 
 --
--- Name: auth_group; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: auth_group; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.auth_group (
@@ -188,10 +325,8 @@ CREATE TABLE public.auth_group (
 );
 
 
-ALTER TABLE public.auth_group OWNER TO pimarket;
-
 --
--- Name: auth_group_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: auth_group_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.auth_group ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -205,7 +340,7 @@ ALTER TABLE public.auth_group ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTI
 
 
 --
--- Name: auth_group_permissions; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.auth_group_permissions (
@@ -215,10 +350,8 @@ CREATE TABLE public.auth_group_permissions (
 );
 
 
-ALTER TABLE public.auth_group_permissions OWNER TO pimarket;
-
 --
--- Name: auth_group_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.auth_group_permissions ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -232,7 +365,7 @@ ALTER TABLE public.auth_group_permissions ALTER COLUMN id ADD GENERATED BY DEFAU
 
 
 --
--- Name: auth_permission; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: auth_permission; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.auth_permission (
@@ -243,10 +376,8 @@ CREATE TABLE public.auth_permission (
 );
 
 
-ALTER TABLE public.auth_permission OWNER TO pimarket;
-
 --
--- Name: auth_permission_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: auth_permission_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.auth_permission ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -260,7 +391,7 @@ ALTER TABLE public.auth_permission ALTER COLUMN id ADD GENERATED BY DEFAULT AS I
 
 
 --
--- Name: django_admin_log; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: django_admin_log; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.django_admin_log (
@@ -276,10 +407,8 @@ CREATE TABLE public.django_admin_log (
 );
 
 
-ALTER TABLE public.django_admin_log OWNER TO pimarket;
-
 --
--- Name: django_admin_log_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: django_admin_log_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.django_admin_log ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -293,7 +422,7 @@ ALTER TABLE public.django_admin_log ALTER COLUMN id ADD GENERATED BY DEFAULT AS 
 
 
 --
--- Name: django_content_type; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: django_content_type; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.django_content_type (
@@ -303,10 +432,8 @@ CREATE TABLE public.django_content_type (
 );
 
 
-ALTER TABLE public.django_content_type OWNER TO pimarket;
-
 --
--- Name: django_content_type_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: django_content_type_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.django_content_type ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -320,7 +447,7 @@ ALTER TABLE public.django_content_type ALTER COLUMN id ADD GENERATED BY DEFAULT 
 
 
 --
--- Name: django_migrations; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: django_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.django_migrations (
@@ -331,10 +458,8 @@ CREATE TABLE public.django_migrations (
 );
 
 
-ALTER TABLE public.django_migrations OWNER TO pimarket;
-
 --
--- Name: django_migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: django_migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.django_migrations ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -348,7 +473,7 @@ ALTER TABLE public.django_migrations ALTER COLUMN id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: django_session; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: django_session; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.django_session (
@@ -358,10 +483,8 @@ CREATE TABLE public.django_session (
 );
 
 
-ALTER TABLE public.django_session OWNER TO pimarket;
-
 --
--- Name: messaging_conversation; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: messaging_conversation; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.messaging_conversation (
@@ -372,10 +495,8 @@ CREATE TABLE public.messaging_conversation (
 );
 
 
-ALTER TABLE public.messaging_conversation OWNER TO pimarket;
-
 --
--- Name: messaging_conversation_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.messaging_conversation ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -389,7 +510,7 @@ ALTER TABLE public.messaging_conversation ALTER COLUMN id ADD GENERATED BY DEFAU
 
 
 --
--- Name: messaging_conversation_participants; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.messaging_conversation_participants (
@@ -399,10 +520,8 @@ CREATE TABLE public.messaging_conversation_participants (
 );
 
 
-ALTER TABLE public.messaging_conversation_participants OWNER TO pimarket;
-
 --
--- Name: messaging_conversation_participants_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.messaging_conversation_participants ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -416,7 +535,7 @@ ALTER TABLE public.messaging_conversation_participants ALTER COLUMN id ADD GENER
 
 
 --
--- Name: messaging_message; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: messaging_message; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.messaging_message (
@@ -430,10 +549,8 @@ CREATE TABLE public.messaging_message (
 );
 
 
-ALTER TABLE public.messaging_message OWNER TO pimarket;
-
 --
--- Name: messaging_message_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: messaging_message_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.messaging_message ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -447,7 +564,7 @@ ALTER TABLE public.messaging_message ALTER COLUMN id ADD GENERATED BY DEFAULT AS
 
 
 --
--- Name: messaging_messagereadstatus; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.messaging_messagereadstatus (
@@ -458,10 +575,8 @@ CREATE TABLE public.messaging_messagereadstatus (
 );
 
 
-ALTER TABLE public.messaging_messagereadstatus OWNER TO pimarket;
-
 --
--- Name: messaging_messagereadstatus_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.messaging_messagereadstatus ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -475,7 +590,7 @@ ALTER TABLE public.messaging_messagereadstatus ALTER COLUMN id ADD GENERATED BY 
 
 
 --
--- Name: payments_escrowtransaction; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: payments_escrowtransaction; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.payments_escrowtransaction (
@@ -489,10 +604,8 @@ CREATE TABLE public.payments_escrowtransaction (
 );
 
 
-ALTER TABLE public.payments_escrowtransaction OWNER TO pimarket;
-
 --
--- Name: payments_escrowtransaction_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: payments_escrowtransaction_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.payments_escrowtransaction ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -506,7 +619,7 @@ ALTER TABLE public.payments_escrowtransaction ALTER COLUMN id ADD GENERATED BY D
 
 
 --
--- Name: payments_payment; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: payments_payment; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.payments_payment (
@@ -525,10 +638,8 @@ CREATE TABLE public.payments_payment (
 );
 
 
-ALTER TABLE public.payments_payment OWNER TO pimarket;
-
 --
--- Name: payments_payment_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: payments_payment_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.payments_payment ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -542,7 +653,7 @@ ALTER TABLE public.payments_payment ALTER COLUMN id ADD GENERATED BY DEFAULT AS 
 
 
 --
--- Name: shops_delivery; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_delivery; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_delivery (
@@ -560,10 +671,8 @@ CREATE TABLE public.shops_delivery (
 );
 
 
-ALTER TABLE public.shops_delivery OWNER TO pimarket;
-
 --
--- Name: shops_delivery_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_delivery_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_delivery ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -577,7 +686,7 @@ ALTER TABLE public.shops_delivery ALTER COLUMN id ADD GENERATED BY DEFAULT AS ID
 
 
 --
--- Name: shops_dispute; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_dispute; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_dispute (
@@ -592,10 +701,8 @@ CREATE TABLE public.shops_dispute (
 );
 
 
-ALTER TABLE public.shops_dispute OWNER TO pimarket;
-
 --
--- Name: shops_dispute_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_dispute_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_dispute ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -609,7 +716,7 @@ ALTER TABLE public.shops_dispute ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: shops_disputemessage; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_disputemessage (
@@ -621,10 +728,8 @@ CREATE TABLE public.shops_disputemessage (
 );
 
 
-ALTER TABLE public.shops_disputemessage OWNER TO pimarket;
-
 --
--- Name: shops_disputemessage_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_disputemessage ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -638,7 +743,7 @@ ALTER TABLE public.shops_disputemessage ALTER COLUMN id ADD GENERATED BY DEFAULT
 
 
 --
--- Name: shops_order; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_order; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_order (
@@ -662,10 +767,8 @@ CREATE TABLE public.shops_order (
 );
 
 
-ALTER TABLE public.shops_order OWNER TO pimarket;
-
 --
--- Name: shops_order_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_order_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_order ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -679,7 +782,7 @@ ALTER TABLE public.shops_order ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENT
 
 
 --
--- Name: shops_orderitem; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_orderitem; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_orderitem (
@@ -694,10 +797,8 @@ CREATE TABLE public.shops_orderitem (
 );
 
 
-ALTER TABLE public.shops_orderitem OWNER TO pimarket;
-
 --
--- Name: shops_orderitem_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_orderitem_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_orderitem ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -711,7 +812,7 @@ ALTER TABLE public.shops_orderitem ALTER COLUMN id ADD GENERATED BY DEFAULT AS I
 
 
 --
--- Name: shops_product; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_product; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_product (
@@ -732,10 +833,8 @@ CREATE TABLE public.shops_product (
 );
 
 
-ALTER TABLE public.shops_product OWNER TO pimarket;
-
 --
--- Name: shops_product_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_product_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_product ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -749,7 +848,7 @@ ALTER TABLE public.shops_product ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDE
 
 
 --
--- Name: shops_productcategory; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_productcategory; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_productcategory (
@@ -760,10 +859,8 @@ CREATE TABLE public.shops_productcategory (
 );
 
 
-ALTER TABLE public.shops_productcategory OWNER TO pimarket;
-
 --
--- Name: shops_productcategory_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_productcategory_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_productcategory ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -777,7 +874,7 @@ ALTER TABLE public.shops_productcategory ALTER COLUMN id ADD GENERATED BY DEFAUL
 
 
 --
--- Name: shops_shop; Type: TABLE; Schema: public; Owner: pimarket
+-- Name: shops_shop; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.shops_shop (
@@ -794,10 +891,8 @@ CREATE TABLE public.shops_shop (
 );
 
 
-ALTER TABLE public.shops_shop OWNER TO pimarket;
-
 --
--- Name: shops_shop_id_seq; Type: SEQUENCE; Schema: public; Owner: pimarket
+-- Name: shops_shop_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
 ALTER TABLE public.shops_shop ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTITY (
@@ -811,7 +906,7 @@ ALTER TABLE public.shops_shop ALTER COLUMN id ADD GENERATED BY DEFAULT AS IDENTI
 
 
 --
--- Data for Name: accounts_phoneotp; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: accounts_phoneotp; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.accounts_phoneotp (id, phone_number, otp, created_at, expires_at, attempts, is_verified) FROM stdin;
@@ -824,7 +919,7 @@ COPY public.accounts_phoneotp (id, phone_number, otp, created_at, expires_at, at
 
 
 --
--- Data for Name: accounts_user; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: accounts_user; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.accounts_user (id, password, last_login, is_superuser, first_name, last_name, email, is_staff, is_active, date_joined, phone_number, is_phone_verified, display_name, avatar, username) FROM stdin;
@@ -843,7 +938,7 @@ COPY public.accounts_user (id, password, last_login, is_superuser, first_name, l
 
 
 --
--- Data for Name: accounts_user_groups; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: accounts_user_groups; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.accounts_user_groups (id, user_id, group_id) FROM stdin;
@@ -851,7 +946,7 @@ COPY public.accounts_user_groups (id, user_id, group_id) FROM stdin;
 
 
 --
--- Data for Name: accounts_user_user_permissions; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: accounts_user_user_permissions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.accounts_user_user_permissions (id, user_id, permission_id) FROM stdin;
@@ -859,7 +954,7 @@ COPY public.accounts_user_user_permissions (id, user_id, permission_id) FROM std
 
 
 --
--- Data for Name: accounts_userlocation; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: accounts_userlocation; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.accounts_userlocation (id, latitude, longitude, city, country, updated_at, is_current, user_id) FROM stdin;
@@ -867,7 +962,7 @@ COPY public.accounts_userlocation (id, latitude, longitude, city, country, updat
 
 
 --
--- Data for Name: auth_group; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: auth_group; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.auth_group (id, name) FROM stdin;
@@ -875,7 +970,7 @@ COPY public.auth_group (id, name) FROM stdin;
 
 
 --
--- Data for Name: auth_group_permissions; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: auth_group_permissions; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.auth_group_permissions (id, group_id, permission_id) FROM stdin;
@@ -883,7 +978,7 @@ COPY public.auth_group_permissions (id, group_id, permission_id) FROM stdin;
 
 
 --
--- Data for Name: auth_permission; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: auth_permission; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
@@ -975,7 +1070,7 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 
 
 --
--- Data for Name: django_admin_log; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: django_admin_log; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.django_admin_log (id, action_time, object_id, object_repr, action_flag, change_message, content_type_id, user_id) FROM stdin;
@@ -1007,7 +1102,7 @@ COPY public.django_admin_log (id, action_time, object_id, object_repr, action_fl
 
 
 --
--- Data for Name: django_content_type; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: django_content_type; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.django_content_type (id, app_label, model) FROM stdin;
@@ -1036,7 +1131,7 @@ COPY public.django_content_type (id, app_label, model) FROM stdin;
 
 
 --
--- Data for Name: django_migrations; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: django_migrations; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.django_migrations (id, app, name, applied) FROM stdin;
@@ -1068,7 +1163,7 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 
 
 --
--- Data for Name: django_session; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: django_session; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
@@ -1078,7 +1173,7 @@ yzn8tnrhvisiri4kx2txdjg483vbbidq	.eJxVjEEOwiAURO_C2hCgAr8u3XsG8oFBqqZNSrsy3t026U
 
 
 --
--- Data for Name: messaging_conversation; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: messaging_conversation; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.messaging_conversation (id, created_at, updated_at, product_id) FROM stdin;
@@ -1089,7 +1184,7 @@ COPY public.messaging_conversation (id, created_at, updated_at, product_id) FROM
 
 
 --
--- Data for Name: messaging_conversation_participants; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: messaging_conversation_participants; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.messaging_conversation_participants (id, conversation_id, user_id) FROM stdin;
@@ -1103,7 +1198,7 @@ COPY public.messaging_conversation_participants (id, conversation_id, user_id) F
 
 
 --
--- Data for Name: messaging_message; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: messaging_message; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.messaging_message (id, content, is_read, created_at, attachment, conversation_id, sender_id) FROM stdin;
@@ -1111,7 +1206,7 @@ COPY public.messaging_message (id, content, is_read, created_at, attachment, con
 
 
 --
--- Data for Name: messaging_messagereadstatus; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: messaging_messagereadstatus; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.messaging_messagereadstatus (id, read_at, message_id, user_id) FROM stdin;
@@ -1119,7 +1214,7 @@ COPY public.messaging_messagereadstatus (id, read_at, message_id, user_id) FROM 
 
 
 --
--- Data for Name: payments_escrowtransaction; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: payments_escrowtransaction; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.payments_escrowtransaction (id, status, held_at, released_at, auto_release_date, notes, payment_id) FROM stdin;
@@ -1129,7 +1224,7 @@ COPY public.payments_escrowtransaction (id, status, held_at, released_at, auto_r
 
 
 --
--- Data for Name: payments_payment; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: payments_payment; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.payments_payment (id, provider, provider_payment_id, amount_fiat, amount_pi, currency, status, metadata, created_at, updated_at, succeeded_at, order_id) FROM stdin;
@@ -1141,7 +1236,7 @@ COPY public.payments_payment (id, provider, provider_payment_id, amount_fiat, am
 
 
 --
--- Data for Name: shops_delivery; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_delivery; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_delivery (id, tracking_number, carrier, status, shipping_address, shipping_latitude, shipping_longitude, shipped_at, delivered_at, notes, order_id) FROM stdin;
@@ -1151,7 +1246,7 @@ COPY public.shops_delivery (id, tracking_number, carrier, status, shipping_addre
 
 
 --
--- Data for Name: shops_dispute; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_dispute; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_dispute (id, reason, status, resolution, created_at, resolved_at, order_id, raised_by_id) FROM stdin;
@@ -1159,7 +1254,7 @@ COPY public.shops_dispute (id, reason, status, resolution, created_at, resolved_
 
 
 --
--- Data for Name: shops_disputemessage; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_disputemessage; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_disputemessage (id, message, created_at, dispute_id, sender_id) FROM stdin;
@@ -1167,7 +1262,7 @@ COPY public.shops_disputemessage (id, message, created_at, dispute_id, sender_id
 
 
 --
--- Data for Name: shops_order; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_order; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_order (id, order_number, total_fiat, total_pi, currency, status, shipping_address, shipping_latitude, shipping_longitude, notes, created_at, updated_at, paid_at, shipped_at, delivered_at, buyer_id, shop_id) FROM stdin;
@@ -1180,7 +1275,7 @@ COPY public.shops_order (id, order_number, total_fiat, total_pi, currency, statu
 
 
 --
--- Data for Name: shops_orderitem; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_orderitem; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_orderitem (id, quantity, unit_price_fiat, unit_price_pi, subtotal_fiat, subtotal_pi, order_id, product_id) FROM stdin;
@@ -1191,7 +1286,7 @@ COPY public.shops_orderitem (id, quantity, unit_price_fiat, unit_price_pi, subto
 
 
 --
--- Data for Name: shops_product; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_product; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_product (id, title, description, price_fiat, price_pi, is_digital, digital_file_url, stock, image, is_active, created_at, updated_at, category_id, shop_id) FROM stdin;
@@ -1210,7 +1305,7 @@ COPY public.shops_product (id, title, description, price_fiat, price_pi, is_digi
 
 
 --
--- Data for Name: shops_productcategory; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_productcategory; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_productcategory (id, name, slug, description) FROM stdin;
@@ -1227,7 +1322,7 @@ COPY public.shops_productcategory (id, name, slug, description) FROM stdin;
 
 
 --
--- Data for Name: shops_shop; Type: TABLE DATA; Schema: public; Owner: pimarket
+-- Data for Name: shops_shop; Type: TABLE DATA; Schema: public; Owner: -
 --
 
 COPY public.shops_shop (id, name, description, address_text, latitude, longitude, verified, created_at, updated_at, owner_id) FROM stdin;
@@ -1258,182 +1353,182 @@ COPY public.shops_shop (id, name, description, address_text, latitude, longitude
 
 
 --
--- Name: accounts_phoneotp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: accounts_phoneotp_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.accounts_phoneotp_id_seq', 5, true);
 
 
 --
--- Name: accounts_user_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.accounts_user_groups_id_seq', 1, false);
 
 
 --
--- Name: accounts_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: accounts_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.accounts_user_id_seq', 11, true);
 
 
 --
--- Name: accounts_user_user_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.accounts_user_user_permissions_id_seq', 1, false);
 
 
 --
--- Name: accounts_userlocation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: accounts_userlocation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.accounts_userlocation_id_seq', 1, false);
 
 
 --
--- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: auth_group_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.auth_group_id_seq', 1, false);
 
 
 --
--- Name: auth_group_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 1, false);
 
 
 --
--- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.auth_permission_id_seq', 84, true);
 
 
 --
--- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.django_admin_log_id_seq', 24, true);
 
 
 --
--- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.django_content_type_id_seq', 21, true);
 
 
 --
--- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.django_migrations_id_seq', 24, true);
 
 
 --
--- Name: messaging_conversation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.messaging_conversation_id_seq', 3, true);
 
 
 --
--- Name: messaging_conversation_participants_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.messaging_conversation_participants_id_seq', 6, true);
 
 
 --
--- Name: messaging_message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: messaging_message_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.messaging_message_id_seq', 1, false);
 
 
 --
--- Name: messaging_messagereadstatus_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.messaging_messagereadstatus_id_seq', 1, false);
 
 
 --
--- Name: payments_escrowtransaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: payments_escrowtransaction_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.payments_escrowtransaction_id_seq', 2, true);
 
 
 --
--- Name: payments_payment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: payments_payment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.payments_payment_id_seq', 5, true);
 
 
 --
--- Name: shops_delivery_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_delivery_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_delivery_id_seq', 2, true);
 
 
 --
--- Name: shops_dispute_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_dispute_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_dispute_id_seq', 1, false);
 
 
 --
--- Name: shops_disputemessage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_disputemessage_id_seq', 1, false);
 
 
 --
--- Name: shops_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_order_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_order_id_seq', 5, true);
 
 
 --
--- Name: shops_orderitem_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_orderitem_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_orderitem_id_seq', 5, true);
 
 
 --
--- Name: shops_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_product_id_seq', 17, true);
 
 
 --
--- Name: shops_productcategory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_productcategory_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_productcategory_id_seq', 9, true);
 
 
 --
--- Name: shops_shop_id_seq; Type: SEQUENCE SET; Schema: public; Owner: pimarket
+-- Name: shops_shop_id_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
 SELECT pg_catalog.setval('public.shops_shop_id_seq', 23, true);
 
 
 --
--- Name: accounts_phoneotp accounts_phoneotp_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_phoneotp accounts_phoneotp_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_phoneotp
@@ -1441,7 +1536,7 @@ ALTER TABLE ONLY public.accounts_phoneotp
 
 
 --
--- Name: accounts_user_groups accounts_user_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups accounts_user_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_groups
@@ -1449,7 +1544,7 @@ ALTER TABLE ONLY public.accounts_user_groups
 
 
 --
--- Name: accounts_user_groups accounts_user_groups_user_id_group_id_59c0b32f_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups accounts_user_groups_user_id_group_id_59c0b32f_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_groups
@@ -1457,7 +1552,7 @@ ALTER TABLE ONLY public.accounts_user_groups
 
 
 --
--- Name: accounts_user accounts_user_phone_number_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user accounts_user_phone_number_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user
@@ -1465,7 +1560,7 @@ ALTER TABLE ONLY public.accounts_user
 
 
 --
--- Name: accounts_user accounts_user_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user accounts_user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user
@@ -1473,7 +1568,7 @@ ALTER TABLE ONLY public.accounts_user
 
 
 --
--- Name: accounts_user_user_permissions accounts_user_user_permi_user_id_permission_id_2ab516c2_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions accounts_user_user_permi_user_id_permission_id_2ab516c2_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_user_permissions
@@ -1481,7 +1576,7 @@ ALTER TABLE ONLY public.accounts_user_user_permissions
 
 
 --
--- Name: accounts_user_user_permissions accounts_user_user_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions accounts_user_user_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_user_permissions
@@ -1489,7 +1584,7 @@ ALTER TABLE ONLY public.accounts_user_user_permissions
 
 
 --
--- Name: accounts_userlocation accounts_userlocation_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_userlocation accounts_userlocation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_userlocation
@@ -1497,7 +1592,7 @@ ALTER TABLE ONLY public.accounts_userlocation
 
 
 --
--- Name: auth_group auth_group_name_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_group auth_group_name_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_group
@@ -1505,7 +1600,7 @@ ALTER TABLE ONLY public.auth_group
 
 
 --
--- Name: auth_group_permissions auth_group_permissions_group_id_permission_id_0cd325b0_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions auth_group_permissions_group_id_permission_id_0cd325b0_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_group_permissions
@@ -1513,7 +1608,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- Name: auth_group_permissions auth_group_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions auth_group_permissions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_group_permissions
@@ -1521,7 +1616,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- Name: auth_group auth_group_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_group auth_group_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_group
@@ -1529,7 +1624,7 @@ ALTER TABLE ONLY public.auth_group
 
 
 --
--- Name: auth_permission auth_permission_content_type_id_codename_01ab375a_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_permission auth_permission_content_type_id_codename_01ab375a_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_permission
@@ -1537,7 +1632,7 @@ ALTER TABLE ONLY public.auth_permission
 
 
 --
--- Name: auth_permission auth_permission_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_permission auth_permission_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_permission
@@ -1545,7 +1640,7 @@ ALTER TABLE ONLY public.auth_permission
 
 
 --
--- Name: django_admin_log django_admin_log_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_admin_log django_admin_log_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_admin_log
@@ -1553,7 +1648,7 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
--- Name: django_content_type django_content_type_app_label_model_76bd3d3b_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_content_type django_content_type_app_label_model_76bd3d3b_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_content_type
@@ -1561,7 +1656,7 @@ ALTER TABLE ONLY public.django_content_type
 
 
 --
--- Name: django_content_type django_content_type_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_content_type django_content_type_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_content_type
@@ -1569,7 +1664,7 @@ ALTER TABLE ONLY public.django_content_type
 
 
 --
--- Name: django_migrations django_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_migrations django_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_migrations
@@ -1577,7 +1672,7 @@ ALTER TABLE ONLY public.django_migrations
 
 
 --
--- Name: django_session django_session_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_session django_session_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_session
@@ -1585,7 +1680,7 @@ ALTER TABLE ONLY public.django_session
 
 
 --
--- Name: messaging_conversation_participants messaging_conversation_p_conversation_id_user_id_74726b68_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants messaging_conversation_p_conversation_id_user_id_74726b68_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_conversation_participants
@@ -1593,7 +1688,7 @@ ALTER TABLE ONLY public.messaging_conversation_participants
 
 
 --
--- Name: messaging_conversation_participants messaging_conversation_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants messaging_conversation_participants_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_conversation_participants
@@ -1601,7 +1696,7 @@ ALTER TABLE ONLY public.messaging_conversation_participants
 
 
 --
--- Name: messaging_conversation messaging_conversation_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_conversation messaging_conversation_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_conversation
@@ -1609,7 +1704,7 @@ ALTER TABLE ONLY public.messaging_conversation
 
 
 --
--- Name: messaging_message messaging_message_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_message messaging_message_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_message
@@ -1617,7 +1712,7 @@ ALTER TABLE ONLY public.messaging_message
 
 
 --
--- Name: messaging_messagereadstatus messaging_messagereadstatus_message_id_user_id_6a5e3966_uniq; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus messaging_messagereadstatus_message_id_user_id_6a5e3966_uniq; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_messagereadstatus
@@ -1625,7 +1720,7 @@ ALTER TABLE ONLY public.messaging_messagereadstatus
 
 
 --
--- Name: messaging_messagereadstatus messaging_messagereadstatus_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus messaging_messagereadstatus_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_messagereadstatus
@@ -1633,7 +1728,7 @@ ALTER TABLE ONLY public.messaging_messagereadstatus
 
 
 --
--- Name: payments_escrowtransaction payments_escrowtransaction_payment_id_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: payments_escrowtransaction payments_escrowtransaction_payment_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.payments_escrowtransaction
@@ -1641,7 +1736,7 @@ ALTER TABLE ONLY public.payments_escrowtransaction
 
 
 --
--- Name: payments_escrowtransaction payments_escrowtransaction_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: payments_escrowtransaction payments_escrowtransaction_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.payments_escrowtransaction
@@ -1649,7 +1744,7 @@ ALTER TABLE ONLY public.payments_escrowtransaction
 
 
 --
--- Name: payments_payment payments_payment_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: payments_payment payments_payment_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.payments_payment
@@ -1657,7 +1752,7 @@ ALTER TABLE ONLY public.payments_payment
 
 
 --
--- Name: shops_delivery shops_delivery_order_id_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_delivery shops_delivery_order_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_delivery
@@ -1665,7 +1760,7 @@ ALTER TABLE ONLY public.shops_delivery
 
 
 --
--- Name: shops_delivery shops_delivery_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_delivery shops_delivery_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_delivery
@@ -1673,7 +1768,7 @@ ALTER TABLE ONLY public.shops_delivery
 
 
 --
--- Name: shops_dispute shops_dispute_order_id_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_dispute shops_dispute_order_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_dispute
@@ -1681,7 +1776,7 @@ ALTER TABLE ONLY public.shops_dispute
 
 
 --
--- Name: shops_dispute shops_dispute_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_dispute shops_dispute_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_dispute
@@ -1689,7 +1784,7 @@ ALTER TABLE ONLY public.shops_dispute
 
 
 --
--- Name: shops_disputemessage shops_disputemessage_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage shops_disputemessage_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_disputemessage
@@ -1697,7 +1792,7 @@ ALTER TABLE ONLY public.shops_disputemessage
 
 
 --
--- Name: shops_order shops_order_order_number_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_order shops_order_order_number_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_order
@@ -1705,7 +1800,7 @@ ALTER TABLE ONLY public.shops_order
 
 
 --
--- Name: shops_order shops_order_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_order shops_order_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_order
@@ -1713,7 +1808,7 @@ ALTER TABLE ONLY public.shops_order
 
 
 --
--- Name: shops_orderitem shops_orderitem_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_orderitem shops_orderitem_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_orderitem
@@ -1721,7 +1816,7 @@ ALTER TABLE ONLY public.shops_orderitem
 
 
 --
--- Name: shops_product shops_product_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_product shops_product_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_product
@@ -1729,7 +1824,7 @@ ALTER TABLE ONLY public.shops_product
 
 
 --
--- Name: shops_productcategory shops_productcategory_name_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_productcategory shops_productcategory_name_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_productcategory
@@ -1737,7 +1832,7 @@ ALTER TABLE ONLY public.shops_productcategory
 
 
 --
--- Name: shops_productcategory shops_productcategory_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_productcategory shops_productcategory_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_productcategory
@@ -1745,7 +1840,7 @@ ALTER TABLE ONLY public.shops_productcategory
 
 
 --
--- Name: shops_productcategory shops_productcategory_slug_key; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_productcategory shops_productcategory_slug_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_productcategory
@@ -1753,7 +1848,7 @@ ALTER TABLE ONLY public.shops_productcategory
 
 
 --
--- Name: shops_shop shops_shop_pkey; Type: CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_shop shops_shop_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_shop
@@ -1761,350 +1856,350 @@ ALTER TABLE ONLY public.shops_shop
 
 
 --
--- Name: accounts_phoneotp_phone_number_5521de31; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_phoneotp_phone_number_5521de31; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_phoneotp_phone_number_5521de31 ON public.accounts_phoneotp USING btree (phone_number);
 
 
 --
--- Name: accounts_phoneotp_phone_number_5521de31_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_phoneotp_phone_number_5521de31_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_phoneotp_phone_number_5521de31_like ON public.accounts_phoneotp USING btree (phone_number varchar_pattern_ops);
 
 
 --
--- Name: accounts_user_groups_group_id_bd11a704; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups_group_id_bd11a704; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_user_groups_group_id_bd11a704 ON public.accounts_user_groups USING btree (group_id);
 
 
 --
--- Name: accounts_user_groups_user_id_52b62117; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups_user_id_52b62117; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_user_groups_user_id_52b62117 ON public.accounts_user_groups USING btree (user_id);
 
 
 --
--- Name: accounts_user_phone_number_af3e1068_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_user_phone_number_af3e1068_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_user_phone_number_af3e1068_like ON public.accounts_user USING btree (phone_number varchar_pattern_ops);
 
 
 --
--- Name: accounts_user_user_permissions_permission_id_113bb443; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions_permission_id_113bb443; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_user_user_permissions_permission_id_113bb443 ON public.accounts_user_user_permissions USING btree (permission_id);
 
 
 --
--- Name: accounts_user_user_permissions_user_id_e4f0a161; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions_user_id_e4f0a161; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_user_user_permissions_user_id_e4f0a161 ON public.accounts_user_user_permissions USING btree (user_id);
 
 
 --
--- Name: accounts_userlocation_user_id_66f94a3f; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: accounts_userlocation_user_id_66f94a3f; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX accounts_userlocation_user_id_66f94a3f ON public.accounts_userlocation USING btree (user_id);
 
 
 --
--- Name: auth_group_name_a6ea08ec_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: auth_group_name_a6ea08ec_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX auth_group_name_a6ea08ec_like ON public.auth_group USING btree (name varchar_pattern_ops);
 
 
 --
--- Name: auth_group_permissions_group_id_b120cbf9; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions_group_id_b120cbf9; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX auth_group_permissions_group_id_b120cbf9 ON public.auth_group_permissions USING btree (group_id);
 
 
 --
--- Name: auth_group_permissions_permission_id_84c5c92e; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions_permission_id_84c5c92e; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX auth_group_permissions_permission_id_84c5c92e ON public.auth_group_permissions USING btree (permission_id);
 
 
 --
--- Name: auth_permission_content_type_id_2f476e4b; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: auth_permission_content_type_id_2f476e4b; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX auth_permission_content_type_id_2f476e4b ON public.auth_permission USING btree (content_type_id);
 
 
 --
--- Name: django_admin_log_content_type_id_c4bce8eb; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: django_admin_log_content_type_id_c4bce8eb; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX django_admin_log_content_type_id_c4bce8eb ON public.django_admin_log USING btree (content_type_id);
 
 
 --
--- Name: django_admin_log_user_id_c564eba6; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: django_admin_log_user_id_c564eba6; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX django_admin_log_user_id_c564eba6 ON public.django_admin_log USING btree (user_id);
 
 
 --
--- Name: django_session_expire_date_a5c62663; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: django_session_expire_date_a5c62663; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX django_session_expire_date_a5c62663 ON public.django_session USING btree (expire_date);
 
 
 --
--- Name: django_session_session_key_c0390e0f_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: django_session_session_key_c0390e0f_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX django_session_session_key_c0390e0f_like ON public.django_session USING btree (session_key varchar_pattern_ops);
 
 
 --
--- Name: messaging_conversation_participants_conversation_id_890e9e37; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants_conversation_id_890e9e37; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_conversation_participants_conversation_id_890e9e37 ON public.messaging_conversation_participants USING btree (conversation_id);
 
 
 --
--- Name: messaging_conversation_participants_user_id_d4f41769; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants_user_id_d4f41769; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_conversation_participants_user_id_d4f41769 ON public.messaging_conversation_participants USING btree (user_id);
 
 
 --
--- Name: messaging_conversation_product_id_c316d570; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_product_id_c316d570; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_conversation_product_id_c316d570 ON public.messaging_conversation USING btree (product_id);
 
 
 --
--- Name: messaging_message_conversation_id_3db4d3d1; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_message_conversation_id_3db4d3d1; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_message_conversation_id_3db4d3d1 ON public.messaging_message USING btree (conversation_id);
 
 
 --
--- Name: messaging_message_sender_id_7a7088e6; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_message_sender_id_7a7088e6; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_message_sender_id_7a7088e6 ON public.messaging_message USING btree (sender_id);
 
 
 --
--- Name: messaging_messagereadstatus_message_id_f4192ee4; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus_message_id_f4192ee4; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_messagereadstatus_message_id_f4192ee4 ON public.messaging_messagereadstatus USING btree (message_id);
 
 
 --
--- Name: messaging_messagereadstatus_user_id_ebfdbf21; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus_user_id_ebfdbf21; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX messaging_messagereadstatus_user_id_ebfdbf21 ON public.messaging_messagereadstatus USING btree (user_id);
 
 
 --
--- Name: payments_pa_order_i_a76289_idx; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_pa_order_i_a76289_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_pa_order_i_a76289_idx ON public.payments_payment USING btree (order_id, status);
 
 
 --
--- Name: payments_pa_provide_3e1786_idx; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_pa_provide_3e1786_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_pa_provide_3e1786_idx ON public.payments_payment USING btree (provider, provider_payment_id);
 
 
 --
--- Name: payments_payment_order_id_22c479b7; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_payment_order_id_22c479b7; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_payment_order_id_22c479b7 ON public.payments_payment USING btree (order_id);
 
 
 --
--- Name: payments_payment_provider_payment_id_6e8e6ad7; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_payment_provider_payment_id_6e8e6ad7; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_payment_provider_payment_id_6e8e6ad7 ON public.payments_payment USING btree (provider_payment_id);
 
 
 --
--- Name: payments_payment_provider_payment_id_6e8e6ad7_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_payment_provider_payment_id_6e8e6ad7_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_payment_provider_payment_id_6e8e6ad7_like ON public.payments_payment USING btree (provider_payment_id varchar_pattern_ops);
 
 
 --
--- Name: payments_payment_status_fc8cbda2; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_payment_status_fc8cbda2; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_payment_status_fc8cbda2 ON public.payments_payment USING btree (status);
 
 
 --
--- Name: payments_payment_status_fc8cbda2_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: payments_payment_status_fc8cbda2_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX payments_payment_status_fc8cbda2_like ON public.payments_payment USING btree (status varchar_pattern_ops);
 
 
 --
--- Name: shops_dispute_raised_by_id_926412e4; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_dispute_raised_by_id_926412e4; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_dispute_raised_by_id_926412e4 ON public.shops_dispute USING btree (raised_by_id);
 
 
 --
--- Name: shops_disputemessage_dispute_id_b7724219; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage_dispute_id_b7724219; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_disputemessage_dispute_id_b7724219 ON public.shops_disputemessage USING btree (dispute_id);
 
 
 --
--- Name: shops_disputemessage_sender_id_a586acbe; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage_sender_id_a586acbe; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_disputemessage_sender_id_a586acbe ON public.shops_disputemessage USING btree (sender_id);
 
 
 --
--- Name: shops_order_buyer_i_70438f_idx; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_buyer_i_70438f_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_buyer_i_70438f_idx ON public.shops_order USING btree (buyer_id, status);
 
 
 --
--- Name: shops_order_buyer_id_84e935ea; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_buyer_id_84e935ea; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_buyer_id_84e935ea ON public.shops_order USING btree (buyer_id);
 
 
 --
--- Name: shops_order_order_number_a2d3923e_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_order_number_a2d3923e_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_order_number_a2d3923e_like ON public.shops_order USING btree (order_number varchar_pattern_ops);
 
 
 --
--- Name: shops_order_shop_id_499f73_idx; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_shop_id_499f73_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_shop_id_499f73_idx ON public.shops_order USING btree (shop_id, status);
 
 
 --
--- Name: shops_order_shop_id_fcf59d7f; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_shop_id_fcf59d7f; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_shop_id_fcf59d7f ON public.shops_order USING btree (shop_id);
 
 
 --
--- Name: shops_order_status_adc74cd1; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_status_adc74cd1; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_status_adc74cd1 ON public.shops_order USING btree (status);
 
 
 --
--- Name: shops_order_status_adc74cd1_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_order_status_adc74cd1_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_order_status_adc74cd1_like ON public.shops_order USING btree (status varchar_pattern_ops);
 
 
 --
--- Name: shops_orderitem_order_id_d23fdad5; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_orderitem_order_id_d23fdad5; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_orderitem_order_id_d23fdad5 ON public.shops_orderitem USING btree (order_id);
 
 
 --
--- Name: shops_orderitem_product_id_285e7118; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_orderitem_product_id_285e7118; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_orderitem_product_id_285e7118 ON public.shops_orderitem USING btree (product_id);
 
 
 --
--- Name: shops_produ_categor_0a9b03_idx; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_produ_categor_0a9b03_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_produ_categor_0a9b03_idx ON public.shops_product USING btree (category_id);
 
 
 --
--- Name: shops_produ_shop_id_e79730_idx; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_produ_shop_id_e79730_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_produ_shop_id_e79730_idx ON public.shops_product USING btree (shop_id, is_active);
 
 
 --
--- Name: shops_product_category_id_75a38fc1; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_product_category_id_75a38fc1; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_product_category_id_75a38fc1 ON public.shops_product USING btree (category_id);
 
 
 --
--- Name: shops_product_shop_id_b4feef5b; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_product_shop_id_b4feef5b; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_product_shop_id_b4feef5b ON public.shops_product USING btree (shop_id);
 
 
 --
--- Name: shops_productcategory_name_38e48f60_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_productcategory_name_38e48f60_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_productcategory_name_38e48f60_like ON public.shops_productcategory USING btree (name varchar_pattern_ops);
 
 
 --
--- Name: shops_productcategory_slug_a503f48e_like; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_productcategory_slug_a503f48e_like; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_productcategory_slug_a503f48e_like ON public.shops_productcategory USING btree (slug varchar_pattern_ops);
 
 
 --
--- Name: shops_shop_owner_id_9a9c8ee7; Type: INDEX; Schema: public; Owner: pimarket
+-- Name: shops_shop_owner_id_9a9c8ee7; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX shops_shop_owner_id_9a9c8ee7 ON public.shops_shop USING btree (owner_id);
 
 
 --
--- Name: accounts_user_groups accounts_user_groups_group_id_bd11a704_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups accounts_user_groups_group_id_bd11a704_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_groups
@@ -2112,7 +2207,7 @@ ALTER TABLE ONLY public.accounts_user_groups
 
 
 --
--- Name: accounts_user_groups accounts_user_groups_user_id_52b62117_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_groups accounts_user_groups_user_id_52b62117_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_groups
@@ -2120,7 +2215,7 @@ ALTER TABLE ONLY public.accounts_user_groups
 
 
 --
--- Name: accounts_user_user_permissions accounts_user_user_p_permission_id_113bb443_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions accounts_user_user_p_permission_id_113bb443_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_user_permissions
@@ -2128,7 +2223,7 @@ ALTER TABLE ONLY public.accounts_user_user_permissions
 
 
 --
--- Name: accounts_user_user_permissions accounts_user_user_p_user_id_e4f0a161_fk_accounts_; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_user_user_permissions accounts_user_user_p_user_id_e4f0a161_fk_accounts_; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_user_user_permissions
@@ -2136,7 +2231,7 @@ ALTER TABLE ONLY public.accounts_user_user_permissions
 
 
 --
--- Name: accounts_userlocation accounts_userlocation_user_id_66f94a3f_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: accounts_userlocation accounts_userlocation_user_id_66f94a3f_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.accounts_userlocation
@@ -2144,7 +2239,7 @@ ALTER TABLE ONLY public.accounts_userlocation
 
 
 --
--- Name: auth_group_permissions auth_group_permissio_permission_id_84c5c92e_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions auth_group_permissio_permission_id_84c5c92e_fk_auth_perm; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_group_permissions
@@ -2152,7 +2247,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- Name: auth_group_permissions auth_group_permissions_group_id_b120cbf9_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_group_permissions auth_group_permissions_group_id_b120cbf9_fk_auth_group_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_group_permissions
@@ -2160,7 +2255,7 @@ ALTER TABLE ONLY public.auth_group_permissions
 
 
 --
--- Name: auth_permission auth_permission_content_type_id_2f476e4b_fk_django_co; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: auth_permission auth_permission_content_type_id_2f476e4b_fk_django_co; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.auth_permission
@@ -2168,7 +2263,7 @@ ALTER TABLE ONLY public.auth_permission
 
 
 --
--- Name: django_admin_log django_admin_log_content_type_id_c4bce8eb_fk_django_co; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_admin_log django_admin_log_content_type_id_c4bce8eb_fk_django_co; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_admin_log
@@ -2176,7 +2271,7 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
--- Name: django_admin_log django_admin_log_user_id_c564eba6_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: django_admin_log django_admin_log_user_id_c564eba6_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.django_admin_log
@@ -2184,7 +2279,7 @@ ALTER TABLE ONLY public.django_admin_log
 
 
 --
--- Name: messaging_conversation_participants messaging_conversati_conversation_id_890e9e37_fk_messaging; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants messaging_conversati_conversation_id_890e9e37_fk_messaging; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_conversation_participants
@@ -2192,7 +2287,7 @@ ALTER TABLE ONLY public.messaging_conversation_participants
 
 
 --
--- Name: messaging_conversation_participants messaging_conversati_user_id_d4f41769_fk_accounts_; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_conversation_participants messaging_conversati_user_id_d4f41769_fk_accounts_; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_conversation_participants
@@ -2200,7 +2295,7 @@ ALTER TABLE ONLY public.messaging_conversation_participants
 
 
 --
--- Name: messaging_conversation messaging_conversation_product_id_c316d570_fk_shops_product_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_conversation messaging_conversation_product_id_c316d570_fk_shops_product_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_conversation
@@ -2208,7 +2303,7 @@ ALTER TABLE ONLY public.messaging_conversation
 
 
 --
--- Name: messaging_message messaging_message_conversation_id_3db4d3d1_fk_messaging; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_message messaging_message_conversation_id_3db4d3d1_fk_messaging; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_message
@@ -2216,7 +2311,7 @@ ALTER TABLE ONLY public.messaging_message
 
 
 --
--- Name: messaging_message messaging_message_sender_id_7a7088e6_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_message messaging_message_sender_id_7a7088e6_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_message
@@ -2224,7 +2319,7 @@ ALTER TABLE ONLY public.messaging_message
 
 
 --
--- Name: messaging_messagereadstatus messaging_messagerea_message_id_f4192ee4_fk_messaging; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus messaging_messagerea_message_id_f4192ee4_fk_messaging; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_messagereadstatus
@@ -2232,7 +2327,7 @@ ALTER TABLE ONLY public.messaging_messagereadstatus
 
 
 --
--- Name: messaging_messagereadstatus messaging_messagerea_user_id_ebfdbf21_fk_accounts_; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: messaging_messagereadstatus messaging_messagerea_user_id_ebfdbf21_fk_accounts_; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.messaging_messagereadstatus
@@ -2240,7 +2335,7 @@ ALTER TABLE ONLY public.messaging_messagereadstatus
 
 
 --
--- Name: payments_escrowtransaction payments_escrowtrans_payment_id_4ade8c79_fk_payments_; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: payments_escrowtransaction payments_escrowtrans_payment_id_4ade8c79_fk_payments_; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.payments_escrowtransaction
@@ -2248,7 +2343,7 @@ ALTER TABLE ONLY public.payments_escrowtransaction
 
 
 --
--- Name: payments_payment payments_payment_order_id_22c479b7_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: payments_payment payments_payment_order_id_22c479b7_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.payments_payment
@@ -2256,7 +2351,7 @@ ALTER TABLE ONLY public.payments_payment
 
 
 --
--- Name: shops_delivery shops_delivery_order_id_4881eb45_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_delivery shops_delivery_order_id_4881eb45_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_delivery
@@ -2264,7 +2359,7 @@ ALTER TABLE ONLY public.shops_delivery
 
 
 --
--- Name: shops_dispute shops_dispute_order_id_b3eb1a01_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_dispute shops_dispute_order_id_b3eb1a01_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_dispute
@@ -2272,7 +2367,7 @@ ALTER TABLE ONLY public.shops_dispute
 
 
 --
--- Name: shops_dispute shops_dispute_raised_by_id_926412e4_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_dispute shops_dispute_raised_by_id_926412e4_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_dispute
@@ -2280,7 +2375,7 @@ ALTER TABLE ONLY public.shops_dispute
 
 
 --
--- Name: shops_disputemessage shops_disputemessage_dispute_id_b7724219_fk_shops_dispute_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage shops_disputemessage_dispute_id_b7724219_fk_shops_dispute_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_disputemessage
@@ -2288,7 +2383,7 @@ ALTER TABLE ONLY public.shops_disputemessage
 
 
 --
--- Name: shops_disputemessage shops_disputemessage_sender_id_a586acbe_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_disputemessage shops_disputemessage_sender_id_a586acbe_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_disputemessage
@@ -2296,7 +2391,7 @@ ALTER TABLE ONLY public.shops_disputemessage
 
 
 --
--- Name: shops_order shops_order_buyer_id_84e935ea_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_order shops_order_buyer_id_84e935ea_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_order
@@ -2304,7 +2399,7 @@ ALTER TABLE ONLY public.shops_order
 
 
 --
--- Name: shops_order shops_order_shop_id_fcf59d7f_fk_shops_shop_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_order shops_order_shop_id_fcf59d7f_fk_shops_shop_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_order
@@ -2312,7 +2407,7 @@ ALTER TABLE ONLY public.shops_order
 
 
 --
--- Name: shops_orderitem shops_orderitem_order_id_d23fdad5_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_orderitem shops_orderitem_order_id_d23fdad5_fk_shops_order_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_orderitem
@@ -2320,7 +2415,7 @@ ALTER TABLE ONLY public.shops_orderitem
 
 
 --
--- Name: shops_orderitem shops_orderitem_product_id_285e7118_fk_shops_product_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_orderitem shops_orderitem_product_id_285e7118_fk_shops_product_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_orderitem
@@ -2328,7 +2423,7 @@ ALTER TABLE ONLY public.shops_orderitem
 
 
 --
--- Name: shops_product shops_product_category_id_75a38fc1_fk_shops_productcategory_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_product shops_product_category_id_75a38fc1_fk_shops_productcategory_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_product
@@ -2336,7 +2431,7 @@ ALTER TABLE ONLY public.shops_product
 
 
 --
--- Name: shops_product shops_product_shop_id_b4feef5b_fk_shops_shop_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_product shops_product_shop_id_b4feef5b_fk_shops_shop_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_product
@@ -2344,7 +2439,7 @@ ALTER TABLE ONLY public.shops_product
 
 
 --
--- Name: shops_shop shops_shop_owner_id_9a9c8ee7_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: pimarket
+-- Name: shops_shop shops_shop_owner_id_9a9c8ee7_fk_accounts_user_id; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.shops_shop
@@ -2355,5 +2450,5 @@ ALTER TABLE ONLY public.shops_shop
 -- PostgreSQL database dump complete
 --
 
-\unrestrict StBKcksXTuGmxcK5cxMbeyakdlLChAPOc98P2cjCI9jX7VYEBPYUhgIyISm4P3w
+\unrestrict Lxa9a6WaKRWc7eU2AsofOar6IYgdHtc8jNE88XahP3Ab8K4t5M749aR2pppKqkC
 
