@@ -119,7 +119,7 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Assurez-vous que le dossier static existe avant de l'ajouter
 STATICFILES_DIRS = [
