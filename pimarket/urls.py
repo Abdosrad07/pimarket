@@ -52,6 +52,9 @@ urlpatterns = [
     path('dashboard/buyer/', core_views.buyer_dashboard, name='buyer_dashboard'),
     path('dashboard/seller/', lambda request: render(request, 'dashboard/seller_dashboard.html'), name='seller_dashboard'),
 
+    # Racine
+    path('', include('core.urls')), # cela met toutes les routes de core.urls à la racine
+
 ]
 
 if settings.DEBUG:
