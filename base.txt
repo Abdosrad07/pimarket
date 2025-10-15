@@ -28,6 +28,7 @@ django-cors-headers==4.3.0
 # Security & Rate Limiting
 django-ratelimit==4.1.0
 django-csp==3.7
+django-cloudinary-storage==0.3.0
 
 # Payments
 stripe==7.4.0
