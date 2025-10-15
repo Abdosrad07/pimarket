@@ -37,6 +37,8 @@ urlpatterns = [
     # Auth pages
     path('auth/login/', lambda request: render(request, 'auth/login.html'), name='login'),
     path('auth/register/', lambda request: render(request, 'auth/register.html'), name='register'),
+    path('terms/', lambda request: render(request, 'auth/terms_of_service.html'), name='terms_of_service'),
+    path('privacy/', lambda request: render(request, 'auth/privacy_policy.html'), name='privacy_policy'),
 
 
     # Shop and order pages
