@@ -80,7 +80,6 @@ services:
       volumes:
         - static_volume:/app/staticfiles
         - media_volume:/app/media
-        - ./public:/app/public:ro
       depends_on:
         - django
 volumes:
