@@ -1,5 +1,6 @@
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from .serializers import (
@@ -109,3 +110,50 @@ class UserLocationView(generics.CreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(user=self.request.user, is_current=True)
+
+
+class PiAuthView(APIView):
+    """
+    Authentifie un utilisateur via le SDK Pi Network.
+
+    Reçoit le résultat de `Pi.authenticate()` (user.uid, username, accessToken)
+    et retourne des tokens JWT. En mode démo le payload du SDK est accepté tel
+    quel ; en production il faut vérifier `accessToken` auprès de
+    https://api.minepi.com/v2/me.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        data = request.data or {}
+        user_info = data.get('user') or {}
+        uid = user_info.get('uid')
+
+        if not uid:
+            return Response(
+                {'error': 'Pi user uid is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        display_name = user_info.get('username') or f'Pi User {str(uid)[:8]}'
+        phone_number = f'pi-{uid}'[:17]
+
+        user, created = User.objects.get_or_create(
+            phone_number=phone_number,
+            defaults={'display_name': display_name}
+        )
+        if not created:
+            user.display_name = display_name
+
+        user.is_phone_verified = True
+        user.is_active = True
+        user.save()
+
+        refresh = RefreshToken.for_user(user)
+        user_data = UserSerializer(user).data
+
+        return Response({
+            'message': 'Pi authentication successful.',
+            'user': user_data,
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }, status=status.HTTP_200_OK)

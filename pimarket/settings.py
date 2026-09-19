@@ -1,4 +1,4 @@
-﻿import os
+import os
 from pathlib import Path
 from datetime import timedelta
 import environ
@@ -8,18 +8,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Environment variables
 env = environ.Env(
-    DEBUG=(bool, False),
-    ALLOWED_HOSTS=(list, []),
+    DEBUG=(bool, True),
+    ALLOWED_HOSTS=(list, ['*']),
     CORS_ALLOWED_ORIGINS=(list, []),
 )
 
-# Read .env file
+# Read .env file if present (optional)
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Security
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env(
+    'SECRET_KEY',
+    default='django-insecure-pimarket-dev-key-change-me-in-production',
+)
 DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+
+# Optional Redis (used for cache, channels and celery). Falls back to
+# in-memory implementations when not configured, so the app runs anywhere.
+REDIS_URL = env('REDIS_URL', default='')
 
 # Application definition
 INSTALLED_APPS = [
@@ -80,18 +87,25 @@ WSGI_APPLICATION = 'pimarket.wsgi.application'
 ASGI_APPLICATION = 'pimarket.asgi.application'
 
 # Channel Layers
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [env('REDIS_URL', default='redis://redis:6379/1')],
+if REDIS_URL:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                'hosts': [REDIS_URL],
+            },
         },
-    },
-}
+    }
+else:
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 # Database
 DATABASES = {
-    'default': env.db('DATABASE_URL')
+    'default': env.db('DATABASE_URL', default='sqlite:///db.sqlite3'),
 }
 
 # Custom User Model
@@ -117,18 +131,19 @@ USE_TZ = True
 # Static files
 STATIC_URL = 'static/'
 
-# Assurez-vous que le dossier static existe avant de l'ajouter
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
-    BASE_DIR / 'public', # Ajouter le dossier public
+    BASE_DIR / 'public',
 ]
 
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Whitenoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Whitenoise (compressed storage without a strict manifest, so a missing
+# asset never crashes a page)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Production Settings
 if not DEBUG:
@@ -142,14 +157,15 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     USE_X_FORWARDED_HOST = True
 
-    # AWS S3 for Media Files
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
-    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    # AWS S3 for media files (only when explicitly configured)
+    if env('AWS_STORAGE_BUCKET_NAME', default=''):
+        DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+        AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+        AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
+        AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+        AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -202,39 +218,59 @@ SPECTACULAR_SETTINGS = {
 }
 
 # Celery Configuration
-CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://redis:6379/0')
-CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://redis:6379/0')
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default=REDIS_URL or 'memory://')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default=REDIS_URL or 'cache+memory://')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+# Without Redis, run Celery tasks synchronously (in-process) so features
+# like escrow release keep working.
+CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=not REDIS_URL)
 
 # Cache
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': env('REDIS_URL', default='redis://redis:6379/0'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
         }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'pimarket-cache',
+        }
+    }
 
 # Stripe
-STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY')
-STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY')
-STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET')
+STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='')
+STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='')
+STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='')
 
 # Pi Network (Mock/Placeholder)
-PI_API_KEY = env('PI_API_KEY')
-PI_API_SECRET = env('PI_API_SECRET')
-PI_WEBHOOK_SECRET = env('PI_WEBHOOK_SECRET')
+PI_API_KEY = env('PI_API_KEY', default='')
+PI_API_SECRET = env('PI_API_SECRET', default='')
+PI_WEBHOOK_SECRET = env('PI_WEBHOOK_SECRET', default='')
+
+# Demo payments: when True (default), fiat/pi payments are simulated so the
+# marketplace can be used end-to-end without real provider keys. Set
+# DEMO_PAYMENTS=False and configure real keys to enable live payments.
+DEMO_PAYMENTS = env.bool('DEMO_PAYMENTS', default=True)
 
 # SMS Provider
-SMS_PROVIDER = env('SMS_PROVIDER', default='twilio')
+SMS_PROVIDER = env('SMS_PROVIDER', default='mock')
 TWILIO_ACCOUNT_SID = env('TWILIO_ACCOUNT_SID', default='')
 TWILIO_AUTH_TOKEN = env('TWILIO_AUTH_TOKEN', default='')
 TWILIO_PHONE_NUMBER = env('TWILIO_PHONE_NUMBER', default='')
+
+# Email
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='noreply@pimarket.local')
 
 # Escrow Settings
 AUTO_RELEASE_DAYS = env.int('AUTO_RELEASE_DAYS', default=7)

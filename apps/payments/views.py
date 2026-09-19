@@ -1,11 +1,13 @@
 ﻿from rest_framework import status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db import transaction
 from datetime import timedelta
 from decimal import Decimal
+import uuid
 from apps.shops.models import Order
 from .models import Payment, EscrowTransaction
 from .stripe_provider import StripeProvider
@@ -13,13 +15,41 @@ from .pi_provider import pi_provider
 from .serializers import PaymentSerializer
 
 
+def _complete_demo_payment(payment):
+    """Complete a demo payment locally: escrow held, order paid."""
+    payment.status = 'succeeded'
+    payment.succeeded_at = timezone.now()
+    payment.metadata = dict(payment.metadata or {}, demo=True)
+    payment.save()
+
+    EscrowTransaction.objects.get_or_create(
+        payment=payment,
+        defaults={
+            'status': 'held',
+            'auto_release_date': timezone.now() + timedelta(days=settings.AUTO_RELEASE_DAYS),
+        },
+    )
+
+    order = payment.order
+    order.status = 'paid_in_escrow'
+    order.paid_at = timezone.now()
+    order.save()
+
+    # Auto-release escrow for digital-only orders
+    if all(item.product.is_digital for item in order.items.all()):
+        from .tasks import release_escrow_funds
+        release_escrow_funds.delay(order.id)
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def create_payment(request, order_id):
     """
     Create a payment for an order
-    
-    Supports Stripe (fiat) and Pi Network (pi) payments
+
+    Supports Stripe (fiat) and Pi Network (pi) payments. When DEMO_PAYMENTS
+    is enabled (default) and no provider keys are configured, payments are
+    simulated locally so the marketplace works end-to-end.
     """
     order = get_object_or_404(Order, id=order_id, buyer=request.user)
     
@@ -29,9 +59,35 @@ def create_payment(request, order_id):
         }, status=status.HTTP_400_BAD_REQUEST)
     
     currency = order.currency
+    demo_mode = settings.DEMO_PAYMENTS and (
+        currency == 'pi' or not settings.STRIPE_SECRET_KEY
+    )
     
     try:
         with transaction.atomic():
+            if demo_mode:
+                provider = 'mock' if currency == 'fiat' else 'pi'
+                payment = Payment.objects.create(
+                    order=order,
+                    provider=provider,
+                    provider_payment_id=f"demo_{uuid.uuid4().hex[:16]}",
+                    amount_fiat=order.total_fiat if currency == 'fiat' else 0,
+                    amount_pi=order.total_pi if currency == 'pi' else 0,
+                    currency=currency,
+                    status='pending',
+                    metadata={'demo': True},
+                )
+                _complete_demo_payment(payment)
+
+                return Response({
+                    'payment': PaymentSerializer(payment).data,
+                    'demo': True,
+                    'message': (
+                        'Paiement simulé avec succès (mode démo). '
+                        'Commande payée et sécurisée en escrow.'
+                    ),
+                })
+
             if currency == 'fiat':
                 # Stripe payment
                 amount_cents = int(order.total_fiat * 100)

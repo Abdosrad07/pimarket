@@ -51,12 +51,16 @@ class TestChatConsumer:
         communicator1.scope['user'] = user1
         connected1, _ = await communicator1.connect()
         assert connected1, "L'utilisateur 1 n'a pas pu se connecter."
+        # Consommer le message de bienvenue envoyé à la connexion
+        await communicator1.receive_from()
 
         # Communicator pour le second utilisateur
         communicator2 = WebsocketCommunicator(application, f"/ws/chat/{conversation_id}/")
         communicator2.scope['user'] = user2
         connected2, _ = await communicator2.connect()
         assert connected2, "L'utilisateur 2 n'a pas pu se connecter."
+        # Consommer le message de bienvenue envoyé à la connexion
+        await communicator2.receive_from()
 
         # L'utilisateur 1 envoie un message
         test_message = "Bonjour, monde !"

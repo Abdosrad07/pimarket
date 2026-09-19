@@ -1,1 +1,1 @@
-web: gunicorn pimarket.wsgi --log-file - --access-logfile -
+web: sh -c "python manage.py migrate --noinput && python manage.py seed_demo_data && python manage.py collectstatic --noinput && gunicorn pimarket.wsgi --bind 0.0.0.0:${PORT:-8000} --log-file - --access-logfile -"

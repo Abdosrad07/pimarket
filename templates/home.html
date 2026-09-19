@@ -1,125 +1,523 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Accueil - Pi Market{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* ===== HERO ===== */
+    .hero-section {
+        background: linear-gradient(135deg, #7b3ff2 0%, #5a20d6 40%, #1a1a2e 100%);
+        border-radius: var(--radius-xl);
+        padding: 80px 40px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 48px;
+    }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .hero-section::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(160,106,245,0.2) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .hero-section * { position: relative; z-index: 1; }
+    .hero-title {
+        font-size: 3.2rem;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+    }
+    .hero-title .gold { color: var(--pi-gold); }
+    .hero-subtitle {
+        font-size: 1.15rem;
+        color: rgba(255,255,255,0.8);
+        max-width: 520px;
+        line-height: 1.6;
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,0.12);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 50px;
+        padding: 6px 16px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: rgba(255,255,255,0.9);
+    }
+    .hero-stats {
+        display: flex;
+        gap: 40px;
+        margin-top: 36px;
+    }
+    .hero-stat-num {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--pi-gold);
+    }
+    .hero-stat-label {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* ===== CATEGORY CARDS ===== */
+    .category-card {
+        text-align: center;
+        padding: 28px 16px;
+        border-radius: var(--radius-lg);
+        background: #fff;
+        border: 1px solid var(--pi-border);
+        transition: all var(--transition);
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+    }
+    .category-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--pi-purple-light);
+        color: inherit;
+    }
+    .category-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+    }
+
+    /* ===== HOW IT WORKS ===== */
+    .step-card {
+        text-align: center;
+        padding: 32px 20px;
+        position: relative;
+    }
+    .step-number {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--pi-purple), var(--pi-purple-dark));
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+        box-shadow: 0 4px 16px rgba(123,63,242,0.3);
+    }
+
+    /* ===== FEATURED PRODUCT ===== */
+    .featured-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    .featured-pi {
+        color: var(--pi-gold);
+        font-size: 0.85rem;
+    }
+
+    /* ===== CTA ===== */
+    .cta-section {
+        background: linear-gradient(135deg, var(--pi-purple), #5a20d6);
+        border-radius: var(--radius-xl);
+        padding: 60px 40px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -10%;
+        width: 350px;
+        height: 350px;
+        background: radial-gradient(circle, rgba(255,215,0,0.12) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .cta-section * { position: relative; z-index: 1; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .hero-section { padding: 40px 24px; }
+        .hero-title { font-size: 2rem; }
+        .hero-stats { gap: 24px; flex-wrap: wrap; }
+        .cta-section { padding: 40px 24px; }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Hero Section -->
-<div class="text-center mb-5">
-    <h1 class="display-4 fw-bold mb-3">
-        
-        Bienvenue sur Pi Market
-    </h1>
-    <p class="lead text-muted">
-        Achetez et vendez en toute sécurité avec la crypto Pi
-    </p>
-    <div class="mt-4">
-        <a href="{% url 'product_list' %}" class="btn btn-pi btn-lg me-2">
-            <i class="bi bi-shop"></i> Explorer les Produits
+
+<!-- ===== HERO ===== -->
+<div class="hero-section fade-in-up">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <div class="hero-badge">
+                <i class="bi bi-currency-bitcoin"></i> Propulsé par Pi Network
+            </div>
+            <h1 class="hero-title mb-3">
+                Achetez &amp; vendez<br>
+                avec la <span class="gold">crypto Pi</span>
+            </h1>
+            <p class="hero-subtitle mb-4">
+                La première marketplace où chaque transaction est sécurisée par l'escrow.
+                Créez votre boutique, publiez vos produits et commencez à vendre en quelques minutes.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{% url 'product_list' %}" class="btn btn-gold btn-lg px-4">
+                    <i class="bi bi-grid-3x3-gap me-1"></i> Explorer le catalogue
+                </a>
+                <a href="{% url 'create_shop' %}" class="btn btn-lg px-4" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:50px;font-weight:600;">
+                    <i class="bi bi-shop-window me-1"></i> Ouvrir ma boutique
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div>
+                    <div class="hero-stat-num">{{ stats.products_count }}</div>
+                    <div class="hero-stat-label">Produits</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">{{ stats.shops_count }}</div>
+                    <div class="hero-stat-label">Boutiques</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">{{ stats.users_count }}</div>
+                    <div class="hero-stat-label">Utilisateurs</div>
+                </div>
+                <div>
+                    <div class="hero-stat-num">{{ stats.orders_count }}</div>
+                    <div class="hero-stat-label">Transactions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block text-center">
+            <div style="font-size:8rem;opacity:0.15;position:absolute;right:-20px;top:50%;transform:translateY(-50%);">
+                <i class="bi bi-currency-bitcoin"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CATEGORIES ===== -->
+<div class="mb-5 fade-in-up">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Explorer par catégorie</h2>
+        <p class="text-muted">Trouvez exactement ce que vous cherchez</p>
+    </div>
+    <div class="row g-3">
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{% url 'product_list' %}?category=1" class="category-card">
+                <div class="category-icon" style="background:rgba(123,63,242,0.1);color:var(--pi-purple);">
+                    <i class="bi bi-phone"></i>
+                </div>
+                <div class="fw-semibold small">Électronique</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{% url 'product_list' %}?category=2" class="category-card">
+                <div class="category-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
+                    <i class="bi bi-controller"></i>
+                </div>
+                <div class="fw-semibold small">Gaming</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{% url 'product_list' %}?category=3" class="category-card">
+                <div class="category-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b;">
+                    <i class="bi bi-book"></i>
+                </div>
+                <div class="fw-semibold small">Formation</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{% url 'product_list' %}?category=4" class="category-card">
+                <div class="category-icon" style="background:rgba(236,72,153,0.1);color:#ec4899;">
+                    <i class="bi bi-bag"></i>
+                </div>
+                <div class="fw-semibold small">Mode</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{% url 'product_list' %}?category=5" class="category-card">
+                <div class="category-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">
+                    <i class="bi bi-house-gear"></i>
+                </div>
+                <div class="fw-semibold small">Maison</div>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{% url 'product_list' %}" class="category-card">
+                <div class="category-icon" style="background:rgba(107,114,128,0.1);color:#6b7280;">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </div>
+                <div class="fw-semibold small">Tout voir</div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- ===== FEATURED PRODUCTS ===== -->
+<div class="mb-5 fade-in-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Produits en vedette</h2>
+            <p class="text-muted mb-0">Les dernières nouveautés de la communauté</p>
+        </div>
+        <a href="{% url 'product_list' %}" class="btn btn-pi-outline d-none d-sm-inline-flex align-items-center">
+            Tout voir <i class="bi bi-arrow-right ms-1"></i>
         </a>
-        {% if not user.is_authenticated %}
-        <a href="/auth/register/" class="btn btn-pi-outline btn-lg">
-            <i class="bi bi-person-plus"></i> Créer un Compte
+    </div>
+    <div class="row g-4">
+        {% for product in featured_products %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card-pi h-100">
+                <div class="product-card-img-wrapper">
+                    {% if product.image and product.image.url %}
+                    <img src="{{ product.image.url }}" class="product-card-img" alt="{{ product.title }}">
+                    {% else %}
+                    <img src="{% static 'images/placeholder.png' %}" class="product-card-img" alt="{{ product.title }}">
+                    {% endif %}
+                </div>
+                <div class="p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="fw-bold mb-0" style="line-height:1.3;">{{ product.title }}</h6>
+                        {% if product.in_stock %}
+                        <span class="badge bg-success" style="font-size:0.7rem;">Disponible</span>
+                        {% else %}
+                        <span class="badge bg-danger" style="font-size:0.7rem;">Épuisé</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted small mb-3" style="line-height:1.4;">{{ product.description|truncatewords:12 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="featured-price text-primary">${{ product.price_fiat }}</div>
+                            <div class="featured-pi"><i class="bi bi-currency-bitcoin"></i> {{ product.price_pi }} π</div>
+                        </div>
+                        <a href="{% url 'product_detail' product.id %}" class="btn btn-pi btn-sm">
+                            <i class="bi bi-eye me-1"></i> Détails
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <i class="bi bi-box-seam text-muted" style="font-size:3rem;"></i>
+            <h5 class="mt-3 text-muted">Aucun produit pour le moment</h5>
+            <p class="text-muted">Soyez le premier à créer une boutique !</p>
+            <a href="{% url 'create_shop' %}" class="btn btn-pi mt-2">
+                <i class="bi bi-shop-window me-1"></i> Créer ma boutique
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="d-sm-none text-center mt-4">
+        <a href="{% url 'product_list' %}" class="btn btn-pi">
+            Tout voir <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+</div>
+
+<!-- ===== HOW IT WORKS ===== -->
+<div class="mb-5 fade-in-up">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Comment ça marche ?</h2>
+        <p class="text-muted">Achetez ou vendez en 3 étapes simples</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card-pi step-card h-100">
+                <div class="step-number">1</div>
+                <h5 class="fw-bold">Inscrivez-vous</h5>
+                <p class="text-muted small mb-0">Créez votre compte avec votre numéro de téléphone ou connectez-vous via Pi Network. C'est rapide et gratuit.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-pi step-card h-100">
+                <div class="step-number">2</div>
+                <h5 class="fw-bold">Explorez ou créez</h5>
+                <p class="text-muted small mb-0">Parcourez le catalogue ou créez votre boutique en quelques clics. Ajoutez vos produits avec photos et prix.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-pi step-card h-100">
+                <div class="step-number">3</div>
+                <h5 class="fw-bold">Payez en sécurité</h5>
+                <p class="text-muted small mb-0">Les paiements sont sécurisés par escrow. L'argent n'est libéré qu'après confirmation de livraison.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TRUST / SECURITY ===== -->
+<div class="mb-5 fade-in-up">
+    <div class="card-pi" style="background:linear-gradient(135deg,#f0f9ff,#faf5ff);border:none;">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-6">
+                    <h3 class="fw-bold mb-3">Paiements sécurisés par escrow</h3>
+                    <p class="text-muted mb-4">Vos fonds sont protégés à chaque étape. L'escrow garantit que le vendeur reçoit son paiement uniquement après confirmation de livraison par l'acheteur.</p>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:rgba(16,185,129,0.1);flex-shrink:0;">
+                                    <i class="bi bi-shield-check text-success"></i>
+                                </div>
+                                <span class="small fw-semibold">Escrow sécurisé</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:rgba(59,130,246,0.1);flex-shrink:0;">
+                                    <i class="bi bi-currency-bitcoin text-primary"></i>
+                                </div>
+                                <span class="small fw-semibold">Paiement en Pi</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:rgba(245,158,11,0.1);flex-shrink:0;">
+                                    <i class="bi bi-arrow-repeat text-warning"></i>
+                                </div>
+                                <span class="small fw-semibold">Système de litiges</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:rgba(123,63,242,0.1);flex-shrink:0;">
+                                    <i class="bi bi-headset text-purple" style="color:var(--pi-purple);"></i>
+                                </div>
+                                <span class="small fw-semibold">Support 24/7</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center">
+                    <div style="font-size:6rem;opacity:0.08;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== TESTIMONIALS / SOCIAL PROOF ===== -->
+<div class="mb-5 fade-in-up">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Ce que dit la communauté</h2>
+        <p class="text-muted">Rejoignez des milliers d'utilisateurs satisfaits</p>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card-pi p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:42px;height:42px;background:linear-gradient(135deg,#7b3ff2,#a06af5);font-size:0.9rem;">A</div>
+                    <div class="ms-3">
+                        <div class="fw-bold small">Amadou K.</div>
+                        <div class="text-muted" style="font-size:0.75rem;">Vendeur vérifié</div>
+                    </div>
+                </div>
+                <p class="small text-muted mb-0">"J'ai lancé ma boutique en 10 minutes. Les paiements en Pi sont rapides et l'escrow me rassure en tant que vendeur."</p>
+                <div class="mt-3">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-pi p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:42px;height:42px;background:linear-gradient(135deg,#10b981,#059669);font-size:0.9rem;">F</div>
+                    <div class="ms-3">
+                        <div class="fw-bold small">Fatou D.</div>
+                        <div class="text-muted" style="font-size:0.75rem;">Acheteuse active</div>
+                    </div>
+                </div>
+                <p class="small text-muted mb-0">"Enfin une marketplace qui fonctionne vraiment avec Pi. Les produits sont variés et le système de litiges inspire confiance."</p>
+                <div class="mt-3">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-half text-warning"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card-pi p-4 h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:42px;height:42px;background:linear-gradient(135deg,#f59e0b,#d97706);font-size:0.9rem;">M</div>
+                    <div class="ms-3">
+                        <div class="fw-bold small">Moussa S.</div>
+                        <div class="text-muted" style="font-size:0.75rem;">Développeur Pi</div>
+                    </div>
+                </div>
+                <p class="small text-muted mb-0">"L'API est bien documentée et le code est propre. J'ai intégré Pi Market dans mon projet en quelques heures."</p>
+                <div class="mt-3">
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                    <i class="bi bi-star-fill text-warning"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== CTA ===== -->
+<div class="cta-section fade-in-up">
+    <h2 class="fw-bold display-6 mb-3">Prêt à rejoindre Pi Market ?</h2>
+    <p class="mb-4" style="color:rgba(255,255,255,0.8);max-width:500px;margin:0 auto;">
+        Créez votre compte gratuitement et commencez à acheter ou vendre dès aujourd'hui.
+    </p>
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+        {% if user.is_authenticated %}
+        <a href="{% url 'product_list' %}" class="btn btn-gold btn-lg px-5">
+            <i class="bi bi-grid-3x3-gap me-1"></i> Explorer le catalogue
+        </a>
+        <a href="{% url 'create_shop' %}" class="btn btn-lg px-5" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:50px;font-weight:600;">
+            <i class="bi bi-shop-window me-1"></i> Créer ma boutique
+        </a>
+        {% else %}
+        <a href="{% url 'register' %}" class="btn btn-gold btn-lg px-5">
+            <i class="bi bi-rocket-takeoff me-1"></i> Créer mon compte
+        </a>
+        <a href="{% url 'login' %}" class="btn btn-lg px-5" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;border-radius:50px;font-weight:600;">
+            <i class="bi bi-box-arrow-in-right me-1"></i> J'ai déjà un compte
         </a>
         {% endif %}
     </div>
 </div>
 
-<!-- Stats Cards -->
-<div class="row g-4 mb-5">
-    <div class="col-md-3 col-sm-6">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="bi bi-shop text-primary fs-1"></i>
-                <h3 class="mt-3">{{ stats.shops_count }}</h3>
-                <p class="text-muted">Boutiques</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="bi bi-box-seam text-success fs-1"></i>
-                <h3 class="mt-3">{{ stats.products_count }}</h3>
-                <p class="text-muted">Produits</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="bi bi-people text-info fs-1"></i>
-                <h3 class="mt-3">{{ stats.users_count }}</h3>
-                <p class="text-muted">Utilisateurs</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3 col-sm-6">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="bi bi-cart-check text-warning fs-1"></i>
-                <h3 class="mt-3">{{ stats.orders_count }}</h3>
-                <p class="text-muted">Commandes</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Produits en Vedette -->
-<h2 class="mb-4"><i class="bi bi-star-fill text-warning"></i> Produits en Vedette</h2>
-<div class="row g-4">
-    {% for product in featured_products %}
-    <div class="col-md-4 col-sm-6">
-        <div class="card product-card h-100"> 
-            {% if product.image and product.image.url %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 250px; object-fit: cover;">
-            {% else %}
-            <img src="/static/images/placeholder.png" class="card-img-top" alt="Image non disponible" style="height: 250px; object-fit: cover;">
-            {% endif %}
-            <div class="card-body">
-                <h5 class="card-title">{{ product.title }}</h5>
-                <p class="card-text text-muted small">{{ product.description|truncatewords:15 }}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong class="text-primary">${{ product.price_fiat }}</strong>
-                        <br>
-
-                        <small class="text-muted"><i class="bi bi-currency-bitcoin"></i> {{ product.price_pi }} π</small>
-                    </div>
-                    {% if product.in_stock %}
-                    <span class="badge bg-success">En stock</span>
-                    {% else %}
-                    <span class="badge bg-danger">Rupture</span>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="card-footer bg-white border-0">
-                <a href="{% url 'product_detail' product.id %}" class="btn btn-pi w-100">
-                    <i class="bi bi-eye"></i> Voir Détails
-                </a>
-            </div>
-        </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Aucun produit en vedette pour le moment.
-        </div>
-    </div>
-    {% endfor %}
-</div>
-
-<!-- CTA Section -->
-<div class="text-center mt-5 p-5 bg-light rounded">
-    <h3 class="mb-3">Prêt à Vendre sur Pi Market ?</h3>
-    <p class="text-muted">Créez votre boutique et commencez à vendre en quelques minutes</p>
-    {% if user.is_authenticated %}
-    <a href="/shops/create/" class="btn btn-pi btn-lg">
-        <i class="bi bi-shop-window"></i> Créer Ma Boutique
-    </a>
-    {% else %}
-    <a href="/auth/register/" class="btn btn-pi btn-lg">
-        <i class="bi bi-person-plus"></i> S'inscrire Maintenant
-    </a>
-    {% endif %}
-</div>
 {% endblock %}

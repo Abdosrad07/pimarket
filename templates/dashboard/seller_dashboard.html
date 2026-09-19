@@ -398,13 +398,13 @@ function attachSellerActions() {
                 });
                 
                 if (response.ok) {
-                    alert('Commande marquée comme expédiée !');
+                    showToast('success', 'Commande marquée comme expédiée !');
                     loadSellerOrders();
                 } else {
-                    alert('Erreur lors de la mise à jour');
+                    showToast('error', 'Erreur lors de la mise à jour.');
                 }
             } catch (error) {
-                alert('Erreur: ' + error.message);
+                showToast('error', 'Erreur : ' + error.message);
             }
         });
     });
@@ -534,7 +534,7 @@ async function setupAddProductModal() {
     // Ouvrir le modal
     document.getElementById('addProductBtn').addEventListener('click', () => {
         if (myShopsList.length === 0) {
-            alert("Veuillez d'abord créer une boutique.");
+            showToast('warning', 'Veuillez d\'abord créer une boutique.');
             return;
         }
         addProductModal.show();
@@ -677,7 +677,7 @@ function setupProductActionListeners() {
                     if (response.ok) {
                         loadProducts(); // Recharger la liste
                     } else {
-                        alert('Erreur lors de la suppression.');
+                        showToast('error', 'Erreur lors de la suppression.');
                     }
                 } catch (error) {
                     console.error('Error deleting product:', error);
@@ -707,11 +707,11 @@ function setupShopActionListeners() {
                         await loadProducts();
                     } else {
                         const result = await response.json();
-                        alert('Erreur lors de la suppression de la boutique: ' + JSON.stringify(result));
+                        showToast('error', 'Erreur lors de la suppression de la boutique.');
                     }
                 } catch (error) {
                     console.error('Error deleting shop:', error);
-                    alert('Une erreur réseau est survenue.');
+                    showToast('error', 'Une erreur réseau est survenue.');
                 }
             }
         }

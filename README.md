@@ -18,10 +18,8 @@ A production-ready Django marketplace application for buying and selling goods/s
 
 ## 📋 Prerequisites
 
-- Docker & Docker Compose
 - Python 3.10+ (for local development)
-- PostgreSQL 15
-- Redis 7
+- PostgreSQL 15 et Redis 7 sont **optionnels** (SQLite et cache mémoire par défaut)
 
 ## 🔧 Quick Start
 
@@ -32,52 +30,51 @@ git clone <your-repo-url>
 cd pimarket
 ```
 
-### 2. Configure Environment Variables
+### 2. Install dependencies & run
 
-Copy the example environment file and configure it:
+Aucune configuration n'est requise : l'application démarre avec SQLite, un cache
+mémoire et des paiements en mode démo (voir `docs/CONFIGURATION.md` pour activer
+PostgreSQL, Redis, Stripe ou Pi Network).
 
 ```bash
-cp .env.example .env
+pip install -r requirements/base.txt
+python manage.py migrate
+python manage.py seed_demo_data     # données démo + comptes (idempotent)
+python manage.py runserver
 ```
 
-**⚠️ IMPORTANT: Fill in the following API keys in `.env`:**
+L'application est disponible sur http://localhost:8000
 
-#### Stripe (Fiat Payments)
-Get your keys from https://dashboard.stripe.com/test/apikeys
-```
-STRIPE_SECRET_KEY=sk_test_YOUR_STRIPE_SECRET_KEY_HERE
-STRIPE_PUBLISHABLE_KEY=pk_test_YOUR_STRIPE_PUBLISHABLE_KEY_HERE
-STRIPE_WEBHOOK_SECRET=whsec_YOUR_WEBHOOK_SECRET_HERE
-```
+**Comptes démo** (mot de passe `demo1234`)
+:
+- Acheteur : `+221000000002`
+- Vendeuse : `+221000000001`
+- Admin    : `+221000000000` → `/admin/`
 
-#### Pi Network (Optional - Mock by default)
-Get credentials from https://developers.minepi.com/
-```
-PI_API_KEY=your_pi_api_key_here
-PI_API_SECRET=your_pi_api_secret_here
-PI_WEBHOOK_SECRET=your_pi_webhook_secret_here
-```
+### 3. Configuration optionnelle (production / paiements réels)
 
-#### SMS Provider (Choose one)
-**Twilio** (https://console.twilio.com/):
+Créez un fichier `.env` pour surcharger les valeurs par défaut. Variables principales :
+
 ```
+DEBUG=False
+SECRET_KEY=<clé-forte-unique>
+DATABASE_URL=postgresql://user:pass@host:5432/pimarket
+REDIS_URL=redis://localhost:6379/0
+
+# Paiements réels (sans ça, mode démo = paiements simulés)
+DEMO_PAYMENTS=False
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# SMS réels (sans ça, les OTP s'impriment dans la console)
 SMS_PROVIDER=twilio
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_ACCOUNT_SID=...
+TWILIO_AUTH_TOKEN=...
 TWILIO_PHONE_NUMBER=+1234567890
 ```
 
-**MTN API** (Alternative):
-```
-SMS_PROVIDER=mtn
-MTN_API_KEY=your_mtn_api_key
-MTN_API_SECRET=your_mtn_api_secret
-```
-
-**For Testing** (No real SMS):
-```
-SMS_PROVIDER=mock
-```
+La liste complète est documentée dans `docs/CONFIGURATION.md`.
 
 ### 3. Build and Start Containers
 

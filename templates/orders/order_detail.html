@@ -285,10 +285,10 @@ function attachOrderActions(order) {
                 });
                 
                 if (response.ok) {
-                    alert('Livraison confirmée ! L\'escrow sera libéré au vendeur.');
+                    showToast('success', 'Livraison confirmée ! L\'escrow sera libéré au vendeur.');
                     loadOrderDetails();
                 } else {
-                    alert('Erreur lors de la confirmation');
+                    showToast('error', 'Erreur lors de la confirmation.');
                     this.disabled = false;
                     this.innerHTML = '<i class="bi bi-check-circle"></i> Confirmer la Réception';
                 }
@@ -324,16 +324,16 @@ function attachOrderActions(order) {
                 });
                 
                 if (response.ok) {
-                    alert('Litige ouvert avec succès. Notre équipe va examiner votre demande.');
+                    showToast('success', 'Litige ouvert. Notre équipe va examiner votre demande.');
                     loadOrderDetails();
                 } else {
                     const data = await response.json();
-                    alert('Erreur: ' + (data.error || 'Impossible d\'ouvrir le litige'));
+                    showToast('error', data.error || 'Impossible d\'ouvrir le litige.');
                     this.disabled = false;
                     this.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Ouvrir un Litige';
                 }
             } catch (error) {
-                alert('Erreur: ' + error.message);
+                showToast('error', 'Erreur : ' + error.message);
                 this.disabled = false;
                 this.innerHTML = '<i class="bi bi-exclamation-triangle"></i> Ouvrir un Litige';
             }

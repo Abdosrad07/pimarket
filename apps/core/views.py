@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.core.paginator import Paginator
@@ -103,3 +104,8 @@ def create_shop(request):
     # La logique de création et d'authentification est gérée par l'API via JavaScript.
     # La vue sert uniquement à rendre le template.
     return render(request, 'shops/create_shop.html')
+
+
+def custom_404(request, exception):
+    """Custom 404 page handler."""
+    return render(request, '404.html', status=404)

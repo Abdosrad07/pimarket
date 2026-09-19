@@ -2,186 +2,159 @@
 
 {% block title %}{{ product.title }} - Pi Market{% endblock %}
 
+{% block extra_css %}
+<style>
+    .product-hero-img { border-radius:var(--radius-lg);overflow:hidden; }
+    .product-hero-img img { width:100%;height:500px;object-fit:cover;transition:transform 0.4s ease; }
+    .product-hero-img:hover img { transform:scale(1.03); }
+    .price-box { background:linear-gradient(135deg,#f8f9fc,#faf5ff);border-radius:var(--radius-lg);padding:20px 24px; }
+    .qty-btn { width:40px;height:40px;border-radius:50%;border:1.5px solid var(--pi-border);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--transition);font-weight:700;color:var(--pi-purple); }
+    .qty-btn:hover { background:var(--pi-purple);border-color:var(--pi-purple);color:#fff; }
+    .shop-mini { display:flex;align-items:center;gap:12px;padding:16px;border-radius:var(--radius-md);border:1px solid var(--pi-border); }
+    .shop-mini .shop-avatar { width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--pi-purple),var(--pi-gold));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0; }
+    .guarantee-item { display:flex;align-items:center;gap:10px;padding:8px 0; }
+    .guarantee-item .icon { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+</style>
+{% endblock %}
+
 {% block content %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
-        <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Produits</a></li>
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb" style="font-size:0.85rem;">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'product_list' %}" class="text-decoration-none">Produits</a></li>
         <li class="breadcrumb-item active">{{ product.title }}</li>
     </ol>
 </nav>
 
-<div class="row">
-    <!-- Images Produit -->
+<div class="row g-4">
+    <!-- Image -->
     <div class="col-md-6">
-        <div class="card">
+        <div class="product-hero-img">
             {% if product.image and product.image.url %}
-            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 500px; object-fit: cover;">
+            <img src="{{ product.image.url }}" alt="{{ product.title }}">
             {% else %}
-            <img src="/static/images/placeholder.png" class="card-img-top" alt="Image non disponible" style="height: 500px; object-fit: cover;">
+            <img src="{% static 'images/placeholder.png' %}" alt="{{ product.title }}">
             {% endif %}
         </div>
     </div>
 
-    <!-- Détails Produit -->
+    <!-- Details -->
     <div class="col-md-6">
-        <h1 class="display-5 fw-bold mb-3">{{ product.title }}</h1>
-        
-        <div class="mb-3">
+        <div class="d-flex align-items-center gap-2 mb-2">
             {% if product.in_stock %}
-            <span class="badge bg-success fs-6">
-                <i class="bi bi-check-circle"></i> En Stock ({{ product.stock }} disponibles)
-            </span>
+            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> En stock ({{ product.stock }})</span>
             {% else %}
-            <span class="badge bg-danger fs-6">
-                <i class="bi bi-x-circle"></i> Rupture de Stock
-            </span>
+            <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Épuisé</span>
             {% endif %}
-            
             {% if product.is_digital %}
-            <span class="badge bg-info fs-6">
-                <i class="bi bi-cloud-download"></i> Produit Digital
-            </span>
+            <span class="badge" style="background:#dbeafe;color:#1d4ed8;"><i class="bi bi-cloud-download me-1"></i> Digital</span>
             {% endif %}
         </div>
 
-        <!-- Prix -->
-        <div class="card bg-light mb-4">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-6">
-                        <h3 class="text-primary mb-0">${{ product.price_fiat }}</h3>
-                        <small class="text-muted">Prix en Fiat</small>
+        <h1 class="fw-bold mb-3" style="font-size:1.8rem;line-height:1.2;letter-spacing:-0.02em;">{{ product.title }}</h1>
+
+        <!-- Price -->
+        <div class="price-box mb-4">
+            <div class="row align-items-center">
+                <div class="col-6">
+                    <div style="font-size:2rem;font-weight:800;color:var(--pi-purple);">${{ product.price_fiat }}</div>
+                    <small class="text-muted">Prix en Fiat</small>
+                </div>
+                <div class="col-6">
+                    <div style="font-size:2rem;font-weight:800;color:var(--pi-gold);">
+                        <i class="bi bi-currency-bitcoin"></i> {{ product.price_pi }} π
                     </div>
-                    <div class="col-6">
-                        <h3 class="text-warning mb-0">
-                            <i class="bi bi-currency-bitcoin"></i> {{ product.price_pi }} π
-                        </h3>
-                        <small class="text-muted">Prix en Pi</small>
-                    </div>
+                    <small class="text-muted">Prix en Pi</small>
                 </div>
             </div>
         </div>
 
-        <!-- Quantité -->
         {% if product.in_stock %}
+        <!-- Quantity -->
         <div class="mb-4">
-            <label class="form-label fw-bold">Quantité</label>
-            <div class="input-group" style="width: 150px;">
-                <button class="btn btn-outline-secondary" type="button" id="decreaseQty">
-                    <i class="bi bi-dash"></i>
-                </button>
-                <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="{{ product.stock }}">
-                <button class="btn btn-outline-secondary" type="button" id="increaseQty">
-                    <i class="bi bi-plus"></i>
-                </button>
+            <label class="form-label fw-semibold">Quantité</label>
+            <div class="d-flex align-items-center gap-3">
+                <button class="qty-btn" id="decreaseQty"><i class="bi bi-dash"></i></button>
+                <span class="fw-bold fs-5" id="qtyDisplay" style="min-width:30px;text-align:center;">1</span>
+                <button class="qty-btn" id="increaseQty"><i class="bi bi-plus"></i></button>
             </div>
         </div>
 
-        <!-- Boutons d'action -->
+        <!-- Actions -->
         <div class="d-grid gap-2 mb-4">
             <button class="btn btn-pi btn-lg" id="addToCartBtn">
-                <i class="bi bi-cart-plus"></i> Ajouter au Panier
+                <i class="bi bi-bag-plus me-1"></i> Ajouter au Panier
             </button>
-            <button class="btn btn-outline-success btn-lg" id="buyNowBtn">
-                <i class="bi bi-lightning-charge"></i> Acheter Maintenant
+            <button class="btn btn-gold btn-lg" id="buyNowBtn">
+                <i class="bi bi-lightning-charge-fill me-1"></i> Acheter Maintenant
             </button>
         </div>
         {% else %}
-        <div class="alert alert-warning">
-            <i class="bi bi-exclamation-triangle"></i> Ce produit n'est plus disponible pour le moment.
+        <div class="alert alert-warning d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Ce produit n'est plus disponible pour le moment.
         </div>
         {% endif %}
 
-        <!-- Informations Boutique -->
-        <div class="card mb-4">
+        <!-- Shop -->
+        <div class="shop-mini mb-4">
+            <div class="shop-avatar">{{ product.shop.name|truncatewords:1|first }}</div>
+            <div class="flex-grow-1">
+                <div class="fw-bold small">{{ product.shop.name }}</div>
+                <small class="text-muted">{{ product.shop.address_text|default:"" }}</small>
+            </div>
+            {% if product.shop.verified %}
+            <span class="badge bg-success"><i class="bi bi-patch-check-fill me-1"></i>Vérifié</span>
+            {% endif %}
+            <a href="{% url 'shop_detail' product.shop.id %}" class="btn btn-sm btn-outline-primary">Voir</a>
+        </div>
+    </div>
+</div>
+
+<!-- Description & Specs -->
+<div class="row g-4 mt-3">
+    <div class="col-md-8">
+        <div class="card-pi">
+            <div class="card-header" style="border-bottom:1px solid var(--pi-border);">
+                <h5 class="fw-bold mb-0"><i class="bi bi-info-circle me-2" style="color:var(--pi-purple);"></i>Description</h5>
+            </div>
             <div class="card-body">
-                <h6 class="card-title"><i class="bi bi-shop"></i> Vendu par</h6>
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <h5 class="mb-0">{{ product.shop.name }}</h5>
-                        <small class="text-muted">{{ product.shop.address_text }}</small>
-                        {% if product.shop.verified %}
-                        <span class="badge bg-success ms-2">
-                            <i class="bi bi-patch-check"></i> Vérifié
-                        </span>
-                        {% endif %}
-                    </div>
-                    <a href="{% url 'shop_detail' product.shop.id %}" class="btn btn-outline-primary">
-                        Voir la boutique
-                    </a>
+                <p style="line-height:1.7;">{{ product.description }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card-pi">
+            <div class="card-header" style="border-bottom:1px solid var(--pi-border);">
+                <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2" style="color:var(--pi-purple);"></i>Caractéristiques</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-borderless mb-0" style="font-size:0.88rem;">
+                    <tr><td class="text-muted ps-3">Catégorie</td><td class="fw-semibold">{{ product.category.name|default:"Non classé" }}</td></tr>
+                    <tr><td class="text-muted ps-3">Type</td><td class="fw-semibold">{% if product.is_digital %}Digital{% else %}Physique{% endif %}</td></tr>
+                    <tr><td class="text-muted ps-3">Stock</td><td class="fw-semibold">{{ product.stock }}</td></tr>
+                    <tr><td class="text-muted ps-3">Ajouté le</td><td class="fw-semibold">{{ product.created_at|date:"d/m/Y" }}</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-pi mt-3">
+            <div class="card-header" style="border-bottom:1px solid var(--pi-border);">
+                <h5 class="fw-bold mb-0"><i class="bi bi-shield-check me-2" style="color:var(--pi-success);"></i>Garanties</h5>
+            </div>
+            <div class="card-body">
+                <div class="guarantee-item">
+                    <div class="icon" style="background:rgba(16,185,129,0.1);"><i class="bi bi-lock text-success" style="font-size:0.85rem;"></i></div>
+                    <span class="small">Escrow sécurisé</span>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Description -->
-<div class="row mt-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h4><i class="bi bi-info-circle"></i> Description du Produit</h4>
-            </div>
-            <div class="card-body">
-                <p class="lead">{{ product.description }}</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Caractéristiques -->
-<div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-list-check"></i> Caractéristiques</h5>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item d-flex justify-content-between">
-                    <strong>Catégorie:</strong>
-                    <span>{{ product.category.name|default:"Non classé" }}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <strong>Type:</strong>
-                    <span>{% if product.is_digital %}Digital{% else %}Physique{% endif %}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <strong>Stock:</strong>
-                    <span>{{ product.stock }}</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <strong>Date d'ajout:</strong>
-                    <span>{{ product.created_at|date:"d/m/Y" }}</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-    
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-shield-check"></i> Garanties</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled">
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle text-success"></i> 
-                        Paiement sécurisé avec escrow
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle text-success"></i> 
-                        Protection de l'acheteur
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle text-success"></i> 
-                        Système de litiges intégré
-                    </li>
-                    <li class="mb-2">
-                        <i class="bi bi-check-circle text-success"></i> 
-                        Support client 24/7
-                    </li>
-                </ul>
+                <div class="guarantee-item">
+                    <div class="icon" style="background:rgba(59,130,246,0.1);"><i class="bi bi-shield-check text-primary" style="font-size:0.85rem;"></i></div>
+                    <span class="small">Protection acheteur</span>
+                </div>
+                <div class="guarantee-item">
+                    <div class="icon" style="background:rgba(245,158,11,0.1);"><i class="bi bi-arrow-repeat text-warning" style="font-size:0.85rem;"></i></div>
+                    <span class="small">Système de litiges</span>
+                </div>
             </div>
         </div>
     </div>
@@ -190,75 +163,51 @@
 
 {% block extra_js %}
 <script>
-(() => {
-const productId = parseInt("{{ product.id|escapejs }}");
-const maxStock = parseInt("{{ product.stock|escapejs }}");
+(function() {
+    var productId = parseInt("{{ product.id|escapejs }}");
+    var maxStock = parseInt("{{ product.stock|escapejs }}");
+    var qty = 1;
+    var qtyDisplay = document.getElementById('qtyDisplay');
 
-// Gestion de la quantité
-document.getElementById('increaseQty').addEventListener('click', function() {
-    const qtyInput = document.getElementById('quantity');
-    if (parseInt(qtyInput.value) < maxStock) {
-        qtyInput.value = parseInt(qtyInput.value) + 1;
-    }
-});
-
-document.getElementById('decreaseQty').addEventListener('click', function() {
-    const qtyInput = document.getElementById('quantity');
-    if (parseInt(qtyInput.value) > 1) {
-        qtyInput.value = parseInt(qtyInput.value) - 1;
-    }
-});
-
-// Ajouter au panier
-document.getElementById('addToCartBtn').addEventListener('click', function() {
-    const quantity = parseInt(document.getElementById('quantity').value);
-    
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const existingItem = cart.find(item => item.productId === productId);
-    
-    if (existingItem) {
-        existingItem.quantity += quantity;
-    } else {
-        cart.push({
-            productId: productId,
-            quantity: quantity,
-            title: '{{ product.title|escapejs }}',
-            price_fiat: parseFloat('{{ product.price_fiat|stringformat:".2f" }}'.replace(',', '.')),
-            price_pi: parseFloat('{{ product.price_pi|stringformat:".2f" }}'.replace(',', '.')),
-            image: '{% if product.image and product.image.url %}{{ product.image.url }}{% else %}/static/images/placeholder.png{% endif %}'
-        });
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Feedback
-    this.innerHTML = '<i class="bi bi-check-circle"></i> Ajouté au panier !';
-    this.classList.add('btn-success');
-    
-    // Mise à jour du compteur
-    updateCartCount();
-    
-    setTimeout(() => {
-        this.innerHTML = '<i class="bi bi-cart-plus"></i> Ajouter au Panier';
-        this.classList.remove('btn-success');
+    document.getElementById('increaseQty').addEventListener('click', function() {
+        if (qty < maxStock) { qty++; qtyDisplay.textContent = qty; }
     });
-});
+    document.getElementById('decreaseQty').addEventListener('click', function() {
+        if (qty > 1) { qty--; qtyDisplay.textContent = qty; }
+    });
 
+    document.getElementById('addToCartBtn').addEventListener('click', function() {
+        var cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        var existing = cart.find(function(i) { return i.productId === productId; });
+        if (existing) {
+            existing.quantity += qty;
+        } else {
+            cart.push({
+                productId: productId,
+                quantity: qty,
+                title: "{{ product.title|escapejs }}",
+                price_fiat: parseFloat("{{ product.price_fiat|stringformat:'.2f' }}"),
+                price_pi: parseFloat("{{ product.price_pi|stringformat:'.2f' }}"),
+                image: "{% if product.image and product.image.url %}{{ product.image.url }}{% else %}/static/images/placeholder.png{% endif %}"
+            });
+        }
+        localStorage.setItem('cart', JSON.stringify(cart));
+        window.updateCartCount();
+        showToast('success', qty + ' article' + (qty > 1 ? 's' : '') + ' ajouté' + (qty > 1 ? 's' : '') + ' au panier !');
 
-// Acheter maintenant
-document.getElementById('buyNowBtn').addEventListener('click', function() {
-    // Ajouter au panier puis rediriger
-    document.getElementById('addToCartBtn').click();
-    setTimeout(() => {
-        window.location.href = '/cart/';
-    }, 500);
-});
+        var btn = document.getElementById('addToCartBtn');
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Ajouté !';
+        btn.classList.add('btn-success');
+        setTimeout(function() {
+            btn.innerHTML = '<i class="bi bi-bag-plus me-1"></i> Ajouter au Panier';
+            btn.classList.remove('btn-success');
+        }, 1500);
+    });
 
-function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    document.getElementById('cart-count').textContent = count;
-}
+    document.getElementById('buyNowBtn').addEventListener('click', function() {
+        document.getElementById('addToCartBtn').click();
+        setTimeout(function() { window.location.href = '/cart/'; }, 400);
+    });
 })();
 </script>
 {% endblock %}

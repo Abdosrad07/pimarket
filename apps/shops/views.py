@@ -110,12 +110,21 @@ class ShopProductListCreateView(generics.ListCreateAPIView):
 
 
 class ProductUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
-    """Update or delete a product (owner only)"""
+    """Retrieve (public), update or delete a product (owner only)"""
     serializer_class = ProductSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
+    permission_classes = [permissions.AllowAny]
+
+    def get_permissions(self):
+        """Lecture publique, modification réservée au propriétaire"""
+        if self.request.method in permissions.SAFE_METHODS:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
     def get_queryset(self):
-        return Product.objects.filter(shop__owner=self.request.user)
+        qs = Product.objects.select_related('shop', 'category')
+        if self.request.method in permissions.SAFE_METHODS:
+            return qs.filter(is_active=True)
+        return qs.filter(shop__owner=self.request.user)
 
 
 @api_view(['POST'])

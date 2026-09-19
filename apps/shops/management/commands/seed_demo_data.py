@@ -1,204 +1,170 @@
-﻿"""
+"""
 Management command to seed demo data
 
 Usage: python manage.py seed_demo_data
 
-Location: apps/shops/management/commands/seed_demo_data.py
-"""
+Idempotent: safe to run multiple times.
 
+Demo accounts (password: demo1234):
+- +221000000001  Alice Vendeuse (boutique Tech Paradise + Fashion Hub)
+- +221000000002  Karim Acheteur
+- admin / demo1234 pour le back-office /admin/
+"""
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 from decimal import Decimal
+
 from apps.accounts.models import User, UserLocation
 from apps.shops.models import Shop, Product, ProductCategory, Order, OrderItem
-from apps.payments.models import Payment, EscrowTransaction
+
+
+DEMO_PASSWORD = 'demo1234'
 
 
 class Command(BaseCommand):
-    help = 'Seed database with demo data for testing'
-    
+    help = 'Seed database with idempotent demo data'
+
     def handle(self, *args, **kwargs):
         self.stdout.write('Seeding demo data...')
-        
-        # Create users
-        self.stdout.write('Creating users...')
-        buyer = User.objects.create(
-            phone_number='+1234567890',
-            display_name='John Buyer',
-            is_phone_verified=True
+
+        # --- Users -----------------------------------------------------------
+        buyer, buyer_created = User.objects.get_or_create(
+            phone_number='+221000000002',
+            defaults={'display_name': 'Karim Acheteur'},
         )
-        buyer.set_password('password123')
+        if buyer_created:
+            buyer.set_password(DEMO_PASSWORD)
+        buyer.is_phone_verified = True
+        buyer.is_active = True
         buyer.save()
-        
-        seller = User.objects.create(
-            phone_number='+0987654321',
-            display_name='Jane Seller',
-            is_phone_verified=True
+
+        seller, seller_created = User.objects.get_or_create(
+            phone_number='+221000000001',
+            defaults={'display_name': 'Alice Vendeuse'},
         )
-        seller.set_password('password123')
+        if seller_created:
+            seller.set_password(DEMO_PASSWORD)
+        seller.is_phone_verified = True
+        seller.is_active = True
         seller.save()
-        
-        # Create user locations
-        UserLocation.objects.create(
-            user=buyer,
-            latitude=40.7128,
-            longitude=-74.0060,
-            city='New York',
-            country='USA',
-            is_current=True
-        )
-        
-        UserLocation.objects.create(
-            user=seller,
-            latitude=40.7589,
-            longitude=-73.9851,
-            city='New York',
-            country='USA',
-            is_current=True
-        )
-        
-        # Create categories
-        self.stdout.write('Creating categories...')
-        electronics = ProductCategory.objects.create(
-            name='Electronics',
-            slug='electronics',
-            description='Electronic devices and accessories'
-        )
-        
-        fashion = ProductCategory.objects.create(
-            name='Fashion',
-            slug='fashion',
-            description='Clothing and accessories'
-        )
-        
-        digital = ProductCategory.objects.create(
-            name='Digital Products',
-            slug='digital-products',
-            description='E-books, courses, software'
-        )
-        
-        # Create shops
-        self.stdout.write('Creating shops...')
-        shop1 = Shop.objects.create(
+
+        if not User.objects.filter(is_superuser=True).exists():
+            User.objects.create_superuser(
+                phone_number='+221000000000',
+                password=DEMO_PASSWORD,
+                display_name='Admin Pi Market',
+            )
+            self.stdout.write('Superuser created: +221000000000 / demo1234')
+
+        if not UserLocation.objects.filter(user=buyer).exists():
+            UserLocation.objects.create(
+                user=buyer, latitude=40.7128, longitude=-74.0060,
+                city='New York', country='USA', is_current=True,
+            )
+        if not UserLocation.objects.filter(user=seller).exists():
+            UserLocation.objects.create(
+                user=seller, latitude=40.7589, longitude=-73.9851,
+                city='New York', country='USA', is_current=True,
+            )
+
+        # --- Categories ------------------------------------------------------
+        categories = {}
+        for name, slug, desc in [
+            ('Electronics', 'electronics', 'Electronic devices and accessories'),
+            ('Fashion', 'fashion', 'Clothing and accessories'),
+            ('Digital Products', 'digital-products', 'E-books, courses, software'),
+        ]:
+            cat, _ = ProductCategory.objects.get_or_create(
+                slug=slug, defaults={'name': name, 'description': desc},
+            )
+            categories[slug] = cat
+
+        # --- Shops -----------------------------------------------------------
+        shop1, _ = Shop.objects.get_or_create(
             owner=seller,
             name='Tech Paradise',
-            description='Your one-stop shop for electronics',
-            address_text='123 Tech Street, New York, NY',
-            latitude=40.7589,
-            longitude=-73.9851,
-            verified=True
+            defaults={
+                'description': 'Your one-stop shop for electronics',
+                'address_text': '123 Tech Street, New York, NY',
+                'latitude': Decimal('40.758900'),
+                'longitude': Decimal('-73.985100'),
+                'verified': True,
+            },
         )
-        
-        shop2 = Shop.objects.create(
+        shop2, _ = Shop.objects.get_or_create(
             owner=seller,
             name='Fashion Hub',
-            description='Latest fashion trends',
-            address_text='456 Fashion Ave, New York, NY',
-            latitude=40.7489,
-            longitude=-73.9680,
-            verified=True
+            defaults={
+                'description': 'Latest fashion trends',
+                'address_text': '456 Fashion Ave, New York, NY',
+                'latitude': Decimal('40.748900'),
+                'longitude': Decimal('-73.968000'),
+                'verified': True,
+            },
         )
-        
-        # Create products
-        self.stdout.write('Creating products...')
-        
-        # Physical products
-        Product.objects.create(
-            shop=shop1,
-            category=electronics,
-            title='Wireless Headphones',
-            description='High-quality Bluetooth headphones with noise cancellation',
-            price_fiat=Decimal('99.99'),
-            price_pi=Decimal('31.41'),
-            is_digital=False,
-            stock=50
-        )
-        
-        Product.objects.create(
-            shop=shop1,
-            category=electronics,
-            title='Smart Watch',
-            description='Fitness tracker with heart rate monitor',
-            price_fiat=Decimal('199.99'),
-            price_pi=Decimal('62.83'),
-            is_digital=False,
-            stock=30
-        )
-        
-        Product.objects.create(
-            shop=shop2,
-            category=fashion,
-            title='Designer T-Shirt',
-            description='Premium cotton t-shirt',
-            price_fiat=Decimal('29.99'),
-            price_pi=Decimal('9.42'),
-            is_digital=False,
-            stock=100
-        )
-        
-        Product.objects.create(
-            shop=shop2,
-            category=fashion,
-            title='Leather Jacket',
-            description='Genuine leather jacket',
-            price_fiat=Decimal('299.99'),
-            price_pi=Decimal('94.24'),
-            is_digital=False,
-            stock=20
-        )
-        
-        # Digital products
-        Product.objects.create(
-            shop=shop1,
-            category=digital,
-            title='Python Programming Course',
-            description='Complete Python course for beginners',
-            price_fiat=Decimal('49.99'),
-            price_pi=Decimal('15.70'),
-            is_digital=True,
-            stock=999,
-            digital_file_url='https://example.com/courses/python'
-        )
-        
-        Product.objects.create(
-            shop=shop1,
-            category=digital,
-            title='Web Development E-Book',
-            description='Learn modern web development',
-            price_fiat=Decimal('19.99'),
-            price_pi=Decimal('6.28'),
-            is_digital=True,
-            stock=999,
-            digital_file_url='https://example.com/ebooks/webdev'
-        )
-        
-        # Create a sample order
-        self.stdout.write('Creating sample order...')
-        product = Product.objects.first()
-        
-        order = Order.objects.create(
-            buyer=buyer,
-            shop=product.shop,
-            order_number=Order.generate_order_number(),
-            currency='fiat',
-            status='created',
-            shipping_address='789 Buyer Street, New York, NY',
-            shipping_latitude=40.7128,
-            shipping_longitude=-74.0060
-        )
-        
-        OrderItem.objects.create(
-            order=order,
-            product=product,
-            quantity=1,
-            unit_price_fiat=product.price_fiat,
-            unit_price_pi=product.price_pi
-        )
-        
-        order.calculate_total()
-        
+
+        # --- Products --------------------------------------------------------
+        products_spec = [
+            (shop1, 'electronics', 'Wireless Headphones',
+             'High-quality Bluetooth headphones with noise cancellation',
+             '99.99', '31.41', False, 50),
+            (shop1, 'electronics', 'Smart Watch',
+             'Fitness tracker with heart rate monitor',
+             '199.99', '62.83', False, 30),
+            (shop2, 'fashion', 'Designer T-Shirt',
+             'Premium cotton t-shirt',
+             '29.99', '9.42', False, 100),
+            (shop2, 'fashion', 'Leather Jacket',
+             'Genuine leather jacket',
+             '299.99', '94.24', False, 20),
+            (shop1, 'digital-products', 'Python Programming Course',
+             'Complete Python course for beginners',
+             '49.99', '15.70', True, 999),
+            (shop1, 'digital-products', 'Web Development E-Book',
+             'Learn modern web development',
+             '19.99', '6.28', True, 999),
+        ]
+        products = []
+        for shop, cat_slug, title, desc, fiat, pi, is_digital, stock in products_spec:
+            product, _ = Product.objects.get_or_create(
+                shop=shop,
+                title=title,
+                defaults={
+                    'category': categories[cat_slug],
+                    'description': desc,
+                    'price_fiat': Decimal(fiat),
+                    'price_pi': Decimal(pi),
+                    'is_digital': is_digital,
+                    'stock': stock,
+                    'digital_file_url': 'https://example.com/download' if is_digital else '',
+                },
+            )
+            products.append(product)
+
+        # --- Sample order (only once) ----------------------------------------
+        if not Order.objects.filter(buyer=buyer).exists():
+            product = products[0]
+            order = Order.objects.create(
+                buyer=buyer,
+                shop=product.shop,
+                order_number=Order.generate_order_number(),
+                currency='fiat',
+                status='created',
+                shipping_address='789 Buyer Street, New York, NY',
+                shipping_latitude=Decimal('40.712800'),
+                shipping_longitude=Decimal('-74.006000'),
+            )
+            OrderItem.objects.create(
+                order=order,
+                product=product,
+                quantity=1,
+                unit_price_fiat=product.price_fiat,
+                unit_price_pi=product.price_pi,
+            )
+            order.calculate_total()
+            self.stdout.write('Sample order created')
+
         self.stdout.write(self.style.SUCCESS('Demo data seeded successfully!'))
-        self.stdout.write(f'Buyer: {buyer.phone_number} (password: password123)')
-        self.stdout.write(f'Seller: {seller.phone_number} (password: password123)')
-        self.stdout.write(f'Created {Product.objects.count()} products')
-        self.stdout.write(f'Created {Order.objects.count()} order')
+        self.stdout.write(f'Buyer:  {buyer.phone_number} / {DEMO_PASSWORD}')
+        self.stdout.write(f'Seller: {seller.phone_number} / {DEMO_PASSWORD}')
+        self.stdout.write(f'Admin:  +221000000000 / {DEMO_PASSWORD} (http://host:port/admin/)')
+        self.stdout.write(f'{Product.objects.count()} products, {Shop.objects.count()} shops')
