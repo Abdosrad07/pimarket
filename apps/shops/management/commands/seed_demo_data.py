@@ -140,7 +140,13 @@ class Command(BaseCommand):
             )
             products.append(product)
 
-        # --- Sample order (only once) ----------------------------------------
+        # --- Demo product images ---------------------------------------------
+        from apps.shops.product_art import ensure_product_images
+        if ensure_product_images():
+            self.stdout.write('Demo product images generated & attached')
+        else:
+            self.stdout.write(self.style.WARNING(
+                'Pillow not installed - demo product images skipped'))
         if not Order.objects.filter(buyer=buyer).exists():
             product = products[0]
             order = Order.objects.create(
